@@ -18,7 +18,6 @@ enum Commands {
 pub fn execute() -> Result<()> {
     let cli = RootCommand::parse();
     match &cli.command {
-        Commands::New(cmd) => NewCommand::execute(cmd)?,
+        Commands::New(cmd) => NewCommand::execute(cmd),
     }
-    Ok(())
 }

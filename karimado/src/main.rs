@@ -1,3 +1,5 @@
+extern crate karimado;
+
 fn main() {
-    println!("Hello, world!");
+    _ = karimado::cli::execute();
 }

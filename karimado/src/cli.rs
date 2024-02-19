@@ -7,7 +7,7 @@ use crate::cli::new::NewCommand;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
-struct RootCommand {
+struct Cli {
     #[command(subcommand)]
     command: Commands,
 }
@@ -18,7 +18,7 @@ enum Commands {
 }
 
 pub fn execute() -> Result<()> {
-    let cli = RootCommand::parse();
+    let cli = Cli::parse();
     match &cli.command {
         Commands::New(cmd) => NewCommand::execute(cmd),
     }

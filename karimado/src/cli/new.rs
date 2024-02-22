@@ -2,10 +2,10 @@ use anyhow::Result;
 use clap::Args;
 
 #[derive(Args)]
-pub struct NewCommand {}
+pub(crate) struct NewCommand {}
 
 impl NewCommand {
-    pub fn execute(_cmd: &Self) -> Result<()> {
+    pub(crate) fn execute(&self) -> Result<()> {
         Ok(())
     }
 }

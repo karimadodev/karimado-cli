@@ -9,3 +9,6 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.79"
 clap = { version = "4.5.0", features = ["derive"] }
+rust-embed = "8.2.0"
+serde = { version = "1.0.196", features = ["derive"] }
+toml = "0.8.10"

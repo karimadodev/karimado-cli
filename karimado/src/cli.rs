@@ -1,12 +1,11 @@
+mod contrib;
 mod new;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
-use crate::cli::new::NewCommand;
-
 #[derive(Parser)]
-#[command(version, about, long_about = None)]
+#[command(version, about, long_about = None, styles = contrib::styles())]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -14,7 +13,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    New(NewCommand),
+    New(new::NewCommand),
 }
 
 pub fn execute() -> Result<()> {

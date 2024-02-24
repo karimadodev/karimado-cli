@@ -2,9 +2,12 @@ use anyhow::Result;
 use clap::{Args, ValueEnum};
 use git2::Repository;
 use path_absolutize::Absolutize;
-use std::{fs, path::{Path, PathBuf}};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
-use crate::assets::Assets;
+use crate::assets;
 
 #[derive(Args)]
 pub(crate) struct NewCommand {
@@ -37,24 +40,18 @@ impl NewCommand {
     }
 
     fn initialize_scaffold(&self, path: &Path) -> Result<()> {
-        let f = Assets::get("template/karimado.toml").unwrap();
-        fs::write(path.join("karimadl.toml"), f.data)?;
-
-        let f = Assets::get("template/README.md").unwrap();
-        fs::write(path.join("README.md"), f.data)?;
-
+        assets::copy("template/karimado.toml", &path.join("karimado.toml"))?;
+        assets::copy("template/README.md", &path.join("README.md"))?;
         Ok(())
     }
 
     fn initialize_vcs_repository(&self, path: &Path) -> Result<()> {
         match self.vcs {
             VersionControl::Git => {
-                let f = Assets::get("template/.gitignore").unwrap();
-                fs::write(path.join(".gitignore"), f.data)?;
-
+                assets::copy("template/.gitignore", &path.join(".gitignore"))?;
                 Repository::init(path)?;
-            },
-            _ => {},
+            }
+            _ => {}
         };
 
         Ok(())

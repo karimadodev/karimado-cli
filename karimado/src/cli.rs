@@ -13,6 +13,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Create a new Karimado application at the path you specify
     New(new::NewCommand),
 }
 

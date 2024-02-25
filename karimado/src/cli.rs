@@ -1,5 +1,6 @@
 mod contrib;
 mod new;
+mod run;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -15,11 +16,15 @@ struct Cli {
 enum Commands {
     /// Create a new Karimado application at the path you specify
     New(new::NewCommand),
+
+    /// Run a defined task
+    Run(run::RunCommand),
 }
 
 pub fn execute() -> Result<()> {
     let cli = Cli::parse();
     match &cli.command {
         Commands::New(cmd) => cmd.execute(),
+        Commands::Run(cmd) => cmd.execute(),
     }
 }

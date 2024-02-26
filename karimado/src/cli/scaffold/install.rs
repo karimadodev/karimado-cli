@@ -2,9 +2,9 @@ use anyhow::Result;
 use clap::Args;
 
 #[derive(Args)]
-pub(crate) struct RunCommand {}
+pub(crate) struct InstallCommand {}
 
-impl RunCommand {
+impl InstallCommand {
     pub(crate) fn execute(&self) -> Result<()> {
         Ok(())
     }

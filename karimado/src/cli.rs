@@ -1,5 +1,5 @@
-mod contrib;
 mod build;
+mod contrib;
 mod new;
 mod run;
 mod scaffold;

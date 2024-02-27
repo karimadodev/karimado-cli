@@ -29,7 +29,7 @@ impl NewCommand {
     pub(crate) fn execute(&self) -> Result<()> {
         let path = self.path.absolutize()?;
         if path.exists() && path.read_dir()?.next().is_some() {
-            anyhow::bail!("destination `{:?}` is not empty", path)
+            anyhow::bail!("destination {:?} is not empty", path)
         }
 
         fs::create_dir_all(&path)?;

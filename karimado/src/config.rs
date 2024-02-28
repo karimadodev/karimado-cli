@@ -1,9 +1,17 @@
 mod workspace;
 
+use anyhow::Result;
 use serde::Deserialize;
+use std::{fs, path::Path};
+use toml;
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct Config {
-    workspace: workspace::Workspace,
+    pub(crate) workspace: workspace::Workspace,
+}
+
+pub(crate) fn from_config_file(path: &Path) -> Result<Config> {
+    let data = fs::read_to_string(path)?;
+    Ok(toml::from_str(&data)?)
 }

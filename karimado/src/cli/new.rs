@@ -46,12 +46,9 @@ impl NewCommand {
     }
 
     fn initialize_vcs_repository(&self, path: &Path) -> Result<()> {
-        match self.vcs {
-            VersionControl::Git => {
-                assets::copy("template/.gitignore", &path.join(".gitignore"))?;
-                Repository::init(path)?;
-            }
-            _ => {}
+        if let VersionControl::Git = self.vcs {
+            assets::copy("template/.gitignore", &path.join(".gitignore"))?;
+            Repository::init(path)?;
         };
         Ok(())
     }

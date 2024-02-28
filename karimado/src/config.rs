@@ -3,7 +3,6 @@ mod workspace;
 use anyhow::Result;
 use serde::Deserialize;
 use std::{fs, path::Path};
-use toml;
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

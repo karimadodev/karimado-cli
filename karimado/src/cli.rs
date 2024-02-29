@@ -1,5 +1,4 @@
 mod build;
-mod contrib;
 mod new;
 mod run;
 mod scaffold;
@@ -7,8 +6,10 @@ mod scaffold;
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
+use crate::contrib;
+
 #[derive(Parser)]
-#[command(version, about, long_about = None, disable_help_subcommand = true, styles = contrib::styles())]
+#[command(version, about, long_about = None, disable_help_subcommand = true, styles = contrib::clap::styles())]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

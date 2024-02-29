@@ -4,8 +4,8 @@ use std::{fs, path::Path};
 use url::Url;
 
 use crate::{
-    cli::contrib,
     config::{self, Config},
+    contrib,
     core::download,
 };
 
@@ -18,9 +18,9 @@ pub(crate) struct InstallCommand {
 
 impl InstallCommand {
     pub(crate) fn execute(&self) -> Result<()> {
-        let root_path = contrib::root_path()?;
-        let config_file = root_path.join("karimado.toml");
-        let config = config::from_config_file(&config_file)?;
+        let root_path = contrib::cli::root_path()?;
+        let config_file_path = contrib::cli::config_file_path(&root_path);
+        let config = config::from_config_file(&config_file_path)?;
 
         fs::create_dir_all(root_path.join("tmp/cache/scaffolds"))?;
         fs::create_dir_all(root_path.join("tmp/downloads"))?;

@@ -9,8 +9,11 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.79"
 clap = { version = "4.5.0", features = ["derive"] }
+clap-verbosity-flag = "2.2.0"
+env_logger = "0.11.2"
 fastrand = "2.0.1"
 git2 = "0.18.2"
+log = "0.4.21"
 path-absolutize = "3.1.1"
 rust-embed = "8.2.0"
 serde = { version = "1.0.196", features = ["derive"] }

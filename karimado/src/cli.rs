@@ -57,7 +57,7 @@ pub fn execute() -> i32 {
         Commands::Build(cmd) => cmd.execute(),
         Commands::ScaffoldInstall(cmd) => cmd.execute(),
     } {
-        log::error!("{:?}", r);
+        log::error!("Failed. {:?}", r);
         1
     } else {
         0

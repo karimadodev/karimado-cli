@@ -10,7 +10,7 @@ pub(crate) fn root_path() -> Result<PathBuf> {
             return Ok(path);
         }
         if !path.pop() {
-            anyhow::bail!("could not locate {:?}", CONFIG_FILE_NAME)
+            anyhow::bail!("could not locate {}", CONFIG_FILE_NAME)
         }
     }
 }

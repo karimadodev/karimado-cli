@@ -26,7 +26,7 @@ pub(crate) fn download(url: &Url, path: &Path) -> Result<PathBuf> {
         Err(..) => {
             let values = Vec::from_iter(Scheme::iter().map(|v| v.to_string()));
             anyhow::bail!(
-                "invalid value: string {:?}, expected one of the given scheme values: {:?}",
+                "invalid value: url {:?}, expected one of the given scheme values: {:?}",
                 url.as_str(),
                 values
             )

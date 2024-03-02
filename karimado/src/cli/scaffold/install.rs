@@ -22,6 +22,8 @@ impl InstallCommand {
         let config_file_path = contrib::cli::config_file_path(&root_path);
         let config = config::from_config_file(&config_file_path)?;
 
+        log::info!("Scaffolding project in {}...", root_path.display());
+        log::info!("");
         fs::create_dir_all(root_path.join("tmp/cache/scaffolds"))?;
         fs::create_dir_all(root_path.join("tmp/downloads"))?;
 
@@ -49,13 +51,18 @@ impl InstallCommand {
     }
 
     fn download_scaffold(&self, name: &str, url: &Url, root_path: &Path) -> Result<()> {
+        log::info!("Downloading scaffold {}", name);
+
         let path = root_path.join("tmp/cache/scaffolds").join(name);
         if path.exists() {
-            return Ok(());
+            log::info!("Found cache in {}", path.display());
+        } else {
+            log::info!("Fetching from {}", url);
+            let download_path = download::download(url, &root_path.join("tmp/downloads"))?;
+            fs::rename(download_path, path)?;
         }
 
-        let download_path = download::download(url, &root_path.join("tmp/downloads"))?;
-        fs::rename(download_path, path)?;
+        log::info!("");
         Ok(())
     }
 

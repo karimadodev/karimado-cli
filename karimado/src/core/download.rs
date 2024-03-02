@@ -9,7 +9,7 @@ use std::{
 use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
 use url::Url;
 
-#[derive(Debug, Display, EnumIter, EnumString)]
+#[derive(Display, EnumIter, EnumString)]
 enum Scheme {
     #[strum(serialize = "git+https")]
     GitHttps,

@@ -137,7 +137,7 @@ impl InstallCommand {
         }
 
         let target = root_path.join(kind.to_string());
-        if target.exists() && target.read_dir()?.next().is_some() && !self.force {
+        if contrib::fs::is_dir_nonempty(&target)? && !self.force {
             anyhow::bail!(
                 "target {} is not empty, use the `--force` flag to re-install them",
                 target.display()

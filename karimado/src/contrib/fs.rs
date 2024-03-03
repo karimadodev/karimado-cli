@@ -1,6 +1,10 @@
 use anyhow::Result;
 use std::{fs::File, io::prelude::*, path::Path};
 
+pub(crate) fn is_dir_nonempty(path: &Path) -> Result<bool> {
+    Ok(path.exists() && path.read_dir()?.next().is_some())
+}
+
 pub(crate) fn is_file_identical(path1: &Path, path2: &Path) -> Result<bool> {
     let mut buf1 = Vec::new();
     File::open(path1)?.read_to_end(&mut buf1)?;

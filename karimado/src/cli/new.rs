@@ -8,7 +8,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::assets;
+use crate::{assets, contrib};
 
 #[derive(Args)]
 pub(crate) struct NewCommand {
@@ -29,7 +29,7 @@ enum VersionControl {
 impl NewCommand {
     pub(crate) fn execute(&self) -> Result<()> {
         let path = self.path.absolutize()?;
-        if path.exists() && path.read_dir()?.next().is_some() {
+        if contrib::fs::is_dir_nonempty(&path)? {
             anyhow::bail!("destination {} is not empty", path.display())
         }
 

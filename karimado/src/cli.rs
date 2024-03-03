@@ -5,6 +5,7 @@ mod scaffold;
 
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::{InfoLevel, Verbosity};
+use colored::Colorize;
 
 use crate::contrib;
 
@@ -51,13 +52,13 @@ pub fn execute() -> i32 {
         .filter_level(level_filter)
         .init();
 
-    if let Err(r) = match &cli.command {
+    if let Err(err) = match &cli.command {
         Commands::New(cmd) => cmd.execute(),
         Commands::Run(cmd) => cmd.execute(),
         Commands::Build(cmd) => cmd.execute(),
         Commands::ScaffoldInstall(cmd) => cmd.execute(),
     } {
-        log::error!("Failed. {:?}", r);
+        log::error!("{}", format!("{:?}", err).red());
         1
     } else {
         0

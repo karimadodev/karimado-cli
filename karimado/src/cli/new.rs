@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::{Args, ValueEnum};
+use colored::Colorize;
 use git2::Repository;
 use path_absolutize::Absolutize;
 use std::{
@@ -40,8 +41,8 @@ impl NewCommand {
 
         log::info!("Done. Now run:");
         log::info!("");
-        log::info!("  cd {}", self.path.display());
-        log::info!("  karimado scaffold:install");
+        log::info!("  {}", format!("cd {}", self.path.display()).green());
+        log::info!("  {}", "karimado scaffold:install".green());
         log::info!("");
         Ok(())
     }

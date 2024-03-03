@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::Args;
 use std::{fs, path::Path};
+use strum::Display;
 use url::Url;
 
 use crate::{
@@ -10,7 +11,19 @@ use crate::{
 };
 
 #[derive(Args)]
-pub(crate) struct InstallCommand {}
+pub(crate) struct InstallCommand {
+    /// Overwrite files that already exist
+    #[arg(long, short)]
+    force: bool,
+}
+
+#[derive(Display)]
+enum ScaffoldKind {
+    #[strum(serialize = "web")]
+    Web,
+    #[strum(serialize = "server")]
+    Server,
+}
 
 impl InstallCommand {
     pub(crate) fn execute(&self) -> Result<()> {
@@ -34,20 +47,36 @@ impl InstallCommand {
 
     fn download_web_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
         match &config.workspace.web {
-            Some(value) => self.download_scaffold(&value.name, &value.scaffold.url, root_path),
+            Some(value) => self.download_scaffold(
+                ScaffoldKind::Web,
+                &value.name,
+                &value.scaffold.url,
+                root_path,
+            ),
             _ => Ok(()),
         }
     }
 
     fn download_server_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
         match &config.workspace.server {
-            Some(value) => self.download_scaffold(&value.name, &value.scaffold.url, root_path),
+            Some(value) => self.download_scaffold(
+                ScaffoldKind::Server,
+                &value.name,
+                &value.scaffold.url,
+                root_path,
+            ),
             _ => Ok(()),
         }
     }
 
-    fn download_scaffold(&self, name: &str, url: &Url, root_path: &Path) -> Result<()> {
-        log::info!("Downloading scaffold `{}`...", name);
+    fn download_scaffold(
+        &self,
+        kind: ScaffoldKind,
+        name: &str,
+        url: &Url,
+        root_path: &Path,
+    ) -> Result<()> {
+        log::info!("Downloading {} scaffold `{}`...", kind, name);
 
         let path = root_path.join("tmp/cache/scaffolds").join(name);
         if path.exists() {
@@ -64,25 +93,38 @@ impl InstallCommand {
 
     fn install_web_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
         match &config.workspace.web {
-            Some(value) => {
-                self.install_scaffold(&value.name, &value.scaffold.template_path, root_path)
-            }
+            Some(value) => self.install_scaffold(
+                ScaffoldKind::Web,
+                &value.name,
+                &value.scaffold.template_path,
+                root_path,
+            ),
             _ => Ok(()),
         }
     }
 
     fn install_server_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
         match &config.workspace.server {
-            Some(value) => {
-                self.install_scaffold(&value.name, &value.scaffold.template_path, root_path)
-            }
+            Some(value) => self.install_scaffold(
+                ScaffoldKind::Server,
+                &value.name,
+                &value.scaffold.template_path,
+                root_path,
+            ),
             _ => Ok(()),
         }
     }
 
-    fn install_scaffold(&self, name: &str, template_path: &str, root_path: &Path) -> Result<()> {
+    fn install_scaffold(
+        &self,
+        kind: ScaffoldKind,
+        name: &str,
+        template_path: &str,
+        root_path: &Path,
+    ) -> Result<()> {
         log::info!(
-            "Copying template files from scaffold `{}` to workspace...",
+            "Copying template files from {} scaffold `{}` to workspace...",
+            kind,
             name
         );
 
@@ -92,6 +134,14 @@ impl InstallCommand {
             .join(template_path);
         if !source.exists() {
             anyhow::bail!("template_path {} is not exists", source.display());
+        }
+
+        let target = root_path.join(kind.to_string());
+        if target.exists() && target.read_dir()?.next().is_some() && !self.force {
+            anyhow::bail!(
+                "target {} is not empty, use the `--force` flag to re-install them",
+                target.display()
+            );
         }
 
         rsync::sync(&source, root_path)?;

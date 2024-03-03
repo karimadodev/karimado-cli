@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::Args;
+use colored::Colorize;
 use std::{fs, path::Path};
 use strum::Display;
 use url::Url;
@@ -144,8 +145,13 @@ impl InstallCommand {
             );
         }
 
-        rsync::sync(&source, root_path)?;
-        log::info!("Copied.");
+        let (added, _, identical, overwritten) = rsync::sync(&source, root_path)?;
+        log::info!(
+            "Total: {}, {}, {}",
+            format!("added {}", added).green(),
+            format!("identical {}", identical).blue(),
+            format!("overwritten {}", overwritten).yellow()
+        );
         log::info!("");
         Ok(())
     }

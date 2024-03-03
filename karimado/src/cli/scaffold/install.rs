@@ -47,7 +47,7 @@ impl InstallCommand {
     }
 
     fn download_scaffold(&self, name: &str, url: &Url, root_path: &Path) -> Result<()> {
-        log::info!("Downloading scaffold {}...", name);
+        log::info!("Downloading scaffold `{}`...", name);
 
         let path = root_path.join("tmp/cache/scaffolds").join(name);
         if path.exists() {
@@ -81,7 +81,10 @@ impl InstallCommand {
     }
 
     fn install_scaffold(&self, name: &str, template_path: &str, root_path: &Path) -> Result<()> {
-        log::info!("Copying template files...");
+        log::info!(
+            "Copying template files from scaffold `{}` to workspace...",
+            name
+        );
 
         let source = root_path
             .join("tmp/cache/scaffolds")

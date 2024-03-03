@@ -38,14 +38,14 @@ pub fn execute() -> i32 {
     let cli = Cli::parse();
 
     let level_filter = cli.verbose.log_level_filter();
-    let timestamp: Option<env_logger::fmt::TimestampPrecision> =
-        if level_filter <= log::LevelFilter::Info {
-            None
-        } else {
-            Some(env_logger::fmt::TimestampPrecision::Seconds)
-        };
+    let debugging = level_filter >= log::LevelFilter::Debug;
+    let timestamp: Option<env_logger::fmt::TimestampPrecision> = if debugging {
+        Some(env_logger::fmt::TimestampPrecision::Seconds)
+    } else {
+        None
+    };
     env_logger::Builder::new()
-        .format_level(false)
+        .format_level(debugging)
         .format_target(false)
         .format_timestamp(timestamp)
         .filter_level(level_filter)

@@ -1,4 +1,5 @@
 use anyhow::Result;
+use colored::Colorize;
 use std::{fs, path::Path};
 use walkdir::WalkDir;
 
@@ -21,10 +22,10 @@ pub(crate) fn sync(source: &Path, target: &Path) -> Result<()> {
 
 fn sync_dir(_from: &Path, to: &Path, relpath: &Path) -> Result<()> {
     if to.exists() {
-        log::info!("{:>13}  {}", "exist", relpath.display());
+        log::info!("{:>13}  {}", "exist".blue(), relpath.display());
     } else {
         fs::create_dir_all(to)?;
-        log::info!("{:>13}  {}", "create", relpath.display());
+        log::info!("{:>13}  {}", "create".green(), relpath.display());
     }
     Ok(())
 }
@@ -32,14 +33,14 @@ fn sync_dir(_from: &Path, to: &Path, relpath: &Path) -> Result<()> {
 fn sync_file(from: &Path, to: &Path, relpath: &Path) -> Result<()> {
     if to.exists() {
         if contrib::fs::is_file_identical(from, to)? {
-            log::info!("{:>13}  {}", "identical", relpath.display());
+            log::info!("{:>13}  {}", "identical".blue(), relpath.display());
         } else {
             fs::copy(from, to)?;
-            log::info!("{:>13}  {}", "force", relpath.display());
+            log::warn!("{:>13}  {}", "force".yellow(), relpath.display());
         }
     } else {
         fs::copy(from, to)?;
-        log::info!("{:>13}  {}", "create", relpath.display());
+        log::info!("{:>13}  {}", "create".green(), relpath.display());
     }
     Ok(())
 }

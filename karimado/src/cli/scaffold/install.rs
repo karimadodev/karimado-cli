@@ -1,6 +1,5 @@
 use anyhow::Result;
 use clap::Args;
-use colored::Colorize;
 use std::{fs, path::Path};
 use strum::Display;
 use url::Url;
@@ -140,18 +139,18 @@ impl InstallCommand {
         let target = root_path.join(kind.to_string());
         if contrib::fs::is_dir_nonempty(&target)? && !self.force {
             anyhow::bail!(
-                "target {} is not empty, use the `--force` flag to re-install them",
+                "destination {} is not empty, use the `--force` flag to re-install them",
                 target.display()
             );
         }
 
-        let (added, _, identical, overwritten) = rsync::sync(&source, root_path)?;
-        log::info!(
-            "Total: {}, {}, {}",
-            format!("added {}", added).green(),
-            format!("identical {}", identical).blue(),
-            format!("overwritten {}", overwritten).yellow()
-        );
+        let mut options = rsync::SyncOptions::new();
+        options.add_include("karimado")?;
+        options.add_include("karimado/**")?;
+        options.add_include(&format!("{}", kind))?;
+        options.add_include(&format!("{}/**", kind))?;
+        rsync::sync(&source, root_path, &options)?;
+
         log::info!("");
         Ok(())
     }

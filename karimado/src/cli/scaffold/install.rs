@@ -33,6 +33,7 @@ impl InstallCommand {
 
         log::info!("Scaffolding project in {}...", root_path.display());
         log::info!("");
+        _ = fs::remove_dir_all(root_path.join("tmp/downloads"));
         fs::create_dir_all(root_path.join("tmp/cache/scaffolds"))?;
         fs::create_dir_all(root_path.join("tmp/downloads"))?;
 

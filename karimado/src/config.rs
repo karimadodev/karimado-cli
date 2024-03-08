@@ -1,3 +1,4 @@
+mod tasks;
 mod workspace;
 
 use anyhow::Result;
@@ -8,6 +9,7 @@ use std::{fs, path::Path};
 #[serde(deny_unknown_fields)]
 pub(crate) struct Config {
     pub(crate) workspace: workspace::Workspace,
+    pub(crate) tasks: tasks::Tasks,
 }
 
 pub(crate) fn from_config_file(path: &Path) -> Result<Config> {

@@ -7,6 +7,10 @@ use std::{fs, path::Path};
 struct Assets;
 
 pub(crate) fn copy(from: &str, to: &Path) -> Result<()> {
+    if let Some(parent) = to.parent() {
+        fs::create_dir_all(parent)?;
+    }
+
     let f = Assets::get(from).unwrap();
     fs::write(to, f.data)?;
     Ok(())

@@ -48,8 +48,9 @@ impl NewCommand {
     }
 
     fn initialize_scaffold(&self, path: &Path) -> Result<()> {
-        assets::copy("template/karimado.toml", &path.join("karimado.toml"))?;
-        assets::copy("template/README.md", &path.join("README.md"))?;
+        for file in ["karimado/tasks.toml", "karimado.toml", "README.md"] {
+            assets::copy(&format!("template/{}", file), &path.join(file))?;
+        }
         Ok(())
     }
 

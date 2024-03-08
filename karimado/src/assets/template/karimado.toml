@@ -7,3 +7,6 @@ scaffold.template_path = "template"
 name = "rails"
 scaffold.url = "git+https://github.com/karimadodev/karimado-server-scaffold-rails"
 scaffold.template_path = "template"
+
+[tasks]
+taskfile = "karimado/tasks.toml"

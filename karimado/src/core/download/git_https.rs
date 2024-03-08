@@ -32,10 +32,7 @@ fn git_clone_repoistory(repo_url: &str, repo_path: &Path) -> Result<Repository> 
     let mut builder = RepoBuilder::new();
     let mut builder = match env::var("HTTPS_PROXY") {
         Ok(value) => {
-            log::debug!(
-                "set up proxy using environment variable HTTPS_PROXY={}",
-                value
-            );
+            log::debug!("set up proxy using env HTTPS_PROXY={}", value);
 
             let mut proxy_options = ProxyOptions::new();
             proxy_options.url(&value);

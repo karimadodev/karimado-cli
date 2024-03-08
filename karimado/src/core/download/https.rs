@@ -27,16 +27,16 @@ pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
 }
 
 fn https_get(url: &str) -> Result<reqwest::blocking::Response> {
-    let builder = reqwest::blocking::Client::builder();
-    let builder = match env::var("HTTPS_PROXY") {
-        Ok(value) => {
-            log::debug!(
-                "set up proxy using environment variable HTTPS_PROXY={}",
-                value
-            );
-            builder.proxy(reqwest::Proxy::https(value)?)
-        }
-        Err(..) => builder.no_proxy(),
+    let mut builder = reqwest::blocking::Client::builder();
+    builder = builder.no_proxy();
+
+    if let Ok(value) = env::var("HTTPS_PROXY") {
+        log::debug!("set up proxy using env HTTPS_PROXY={}", value);
+        builder = builder.proxy(reqwest::Proxy::https(value)?)
+    };
+    if let Ok(value) = env::var("HTTP_PROXY") {
+        log::debug!("set up proxy using env HTTP_PROXY={}", value);
+        builder = builder.proxy(reqwest::Proxy::http(value)?)
     };
 
     Ok(builder.build()?.get(url).send()?)

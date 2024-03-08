@@ -15,6 +15,8 @@ enum Scheme {
     GitHttps,
     #[strum(serialize = "https")]
     Https,
+    #[strum(serialize = "http")]
+    Http,
 }
 
 pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
@@ -22,6 +24,7 @@ pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
         Ok(scheme) => match scheme {
             Scheme::GitHttps => git_https::download(url, downloads_path)?,
             Scheme::Https => https::download(url, downloads_path)?,
+            Scheme::Http => https::download(url, downloads_path)?,
         },
         Err(..) => anyhow_bail_unknown_scheme(url.scheme())?,
     })

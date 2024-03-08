@@ -120,7 +120,7 @@ impl InstallCommand {
         &self,
         kind: ScaffoldKind,
         name: &str,
-        template_path: &str,
+        template_pathname: &str,
         root_path: &Path,
     ) -> Result<()> {
         log::info!(
@@ -129,19 +129,34 @@ impl InstallCommand {
             name
         );
 
-        let source = root_path
-            .join("tmp/cache/scaffolds")
-            .join(name)
-            .join(template_path);
-        if !source.exists() {
-            anyhow::bail!("template_path {} is not exists", source.display());
+        let scaffold_path = root_path.join("tmp/cache/scaffolds").join(name);
+        log::info!("  scaffold path: {}", scaffold_path.display());
+
+        let template_path = scaffold_path.join(template_pathname);
+        log::info!("  scaffold template path: {}", template_path.display());
+
+        if !template_path.exists() {
+            anyhow::bail!(
+                "invalid {} scaffold format: template path `{}` does not exists",
+                kind,
+                template_pathname
+            );
         }
 
-        let target = root_path.join(kind.to_string());
-        if contrib::fs::is_dir_nonempty(&target)? && !self.force {
+        let source = template_path.join(kind.to_string());
+        if !source.exists() {
+            anyhow::bail!(
+                "invalid {} scaffold format: source folder `{}` does not exists under template path",
+                kind,
+                kind,
+            );
+        }
+
+        let destination = root_path.join(kind.to_string());
+        if contrib::fs::is_dir_nonempty(&destination)? && !self.force {
             anyhow::bail!(
                 "destination {} is not empty, use the `--force` flag to re-install them",
-                target.display()
+                destination.display()
             );
         }
 
@@ -150,7 +165,7 @@ impl InstallCommand {
         options.add_include("karimado/**")?;
         options.add_include(&format!("{}", kind))?;
         options.add_include(&format!("{}/**", kind))?;
-        rsync::sync(&source, root_path, &options)?;
+        rsync::sync(&template_path, root_path, &options)?;
 
         log::info!("");
         Ok(())

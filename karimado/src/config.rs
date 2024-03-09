@@ -5,7 +5,7 @@ use anyhow::Result;
 use serde::Deserialize;
 use std::{fs, path::Path};
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct Config {
     pub(crate) workspace: workspace::Workspace,

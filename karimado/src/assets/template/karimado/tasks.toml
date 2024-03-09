@@ -1,1 +1,9 @@
+[[includes]]
+name = "server"
+taskfile = "tasks/server.toml"
+optional = true
 
+[[includes]]
+name = "web"
+taskfile = "tasks/web.toml"
+optional = true

@@ -5,13 +5,16 @@ use anyhow::Result;
 use serde::Deserialize;
 use std::{fs, path::Path};
 
+pub(crate) use include::*;
+pub(crate) use task::*;
+
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct Taskfile {
     #[serde(default)]
-    pub(crate) includes: Vec<include::Include>,
+    pub(crate) includes: Vec<Include>,
     #[serde(default)]
-    pub(crate) tasks: Vec<task::Task>,
+    pub(crate) tasks: Vec<Task>,
 }
 
 pub(crate) fn from_taskfile(path: &Path) -> Result<Taskfile> {

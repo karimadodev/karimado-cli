@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::Args;
 
-use crate::{config, contrib, core::task};
+use crate::{config, contrib, core::tasks};
 
 #[derive(Args)]
 pub(crate) struct RunCommand {
@@ -26,7 +26,7 @@ impl RunCommand {
 
         let taskfile = config.tasks.taskfile;
         let taskfile_path = root_path.join(taskfile);
-        let taskmgr = task::TaskMgr::builder()
+        let taskmgr = tasks::TaskMgr::builder()
             .taskfile(&taskfile_path)
             .workdir(&root_path)
             .build()?;

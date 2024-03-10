@@ -1,15 +1,14 @@
 use anyhow::Result;
 use globset::{Glob, GlobBuilder, GlobSet, GlobSetBuilder};
 
+#[derive(Default)]
 pub(crate) struct Options {
     globs_include: Vec<Glob>,
 }
 
 impl Options {
     pub(crate) fn new() -> Self {
-        Self {
-            globs_include: vec![],
-        }
+        Default::default()
     }
 
     pub(crate) fn add_include(&mut self, glob: &str) -> Result<()> {

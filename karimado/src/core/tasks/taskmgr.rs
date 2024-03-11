@@ -1,20 +1,23 @@
 use anyhow::Result;
+use colored::Colorize;
 use std::path::{Path, PathBuf};
 
 use super::{task::Task, taskfile};
 
-#[derive(Default)]
 pub(crate) struct TaskMgr {
     tasks: Vec<Task>,
 }
 
 #[derive(Default)]
 pub(crate) struct TaskMgrBuilder {
-    taskfile: PathBuf,
+    taskfile: String,
     workdir: PathBuf,
 }
 
+#[derive(Default)]
 struct TaskMgrBuilderBuildingContext {
+    tasks: Vec<Task>,
+    tasks_namespace: String,
     taskfile_dir: PathBuf,
 }
 
@@ -23,8 +26,8 @@ impl TaskMgrBuilder {
         Default::default()
     }
 
-    pub(crate) fn taskfile(mut self, taskfile: &Path) -> Self {
-        self.taskfile = taskfile.to_path_buf();
+    pub(crate) fn taskfile(mut self, taskfile: &str) -> Self {
+        self.taskfile = taskfile.to_string();
         self
     }
 
@@ -34,18 +37,27 @@ impl TaskMgrBuilder {
     }
 
     pub(crate) fn build(self) -> Result<TaskMgr> {
-        let ctx = TaskMgrBuilderBuildingContext {
-            taskfile_dir: self.taskfile.parent().unwrap().to_path_buf(),
-        };
-        let taskfile = taskfile::from_taskfile(&self.taskfile)?;
-        self.build_taskfile(&ctx, &taskfile)?;
+        let mut ctx: TaskMgrBuilderBuildingContext = Default::default();
+        let taskfile_path = self.workdir.join(&self.taskfile);
 
-        Ok(Default::default())
+        log::debug!("Parsing taskfile {}", taskfile_path.display());
+        let taskfile = taskfile::from_taskfile(&taskfile_path)?;
+
+        ctx.tasks_namespace = String::new();
+        ctx.taskfile_dir = taskfile_path
+            .parent()
+            .expect("cannot resolve taskfile_dir")
+            .to_path_buf();
+        self.build_taskfile(&mut ctx, &taskfile)?;
+
+        let mut tasks = ctx.tasks;
+        tasks.sort_by(|a, b| a.name.cmp(&b.name));
+        Ok(TaskMgr { tasks })
     }
 
     fn build_taskfile(
         &self,
-        ctx: &TaskMgrBuilderBuildingContext,
+        ctx: &mut TaskMgrBuilderBuildingContext,
         taskfile: &taskfile::Taskfile,
     ) -> Result<()> {
         self.build_taskfile_includes(ctx, &taskfile.includes)?;
@@ -55,7 +67,7 @@ impl TaskMgrBuilder {
 
     fn build_taskfile_includes(
         &self,
-        ctx: &TaskMgrBuilderBuildingContext,
+        ctx: &mut TaskMgrBuilderBuildingContext,
         includes: &[taskfile::Include],
     ) -> Result<()> {
         for i in includes {
@@ -66,15 +78,49 @@ impl TaskMgrBuilder {
 
     fn build_taskfile_include(
         &self,
-        _ctx: &TaskMgrBuilderBuildingContext,
-        _include: &taskfile::Include,
+        ctx: &mut TaskMgrBuilderBuildingContext,
+        include: &taskfile::Include,
     ) -> Result<()> {
+        let taskfile_path = ctx.taskfile_dir.join(&include.taskfile);
+        if !taskfile_path.exists() {
+            if include.optional {
+                return Ok(());
+            }
+            anyhow::bail!(
+                "taskfile `{}` does not exists under {}",
+                include.taskfile,
+                ctx.taskfile_dir.display()
+            );
+        }
+
+        log::debug!("Parsing taskfile {}", taskfile_path.display());
+        let taskfile = taskfile::from_taskfile(&taskfile_path)?;
+
+        let old_tasks_namespace = ctx.tasks_namespace.clone();
+        let old_taskfile_dir = ctx.taskfile_dir.clone();
+
+        let new_tasks_namespace = if !ctx.tasks_namespace.is_empty() {
+            format!("{}:{}", ctx.tasks_namespace, include.name)
+        } else {
+            include.name.to_string()
+        };
+        let new_taskfile_dir = taskfile_path
+            .parent()
+            .expect("cannot resolve taskfile_dir")
+            .to_path_buf();
+
+        ctx.tasks_namespace = new_tasks_namespace;
+        ctx.taskfile_dir = new_taskfile_dir;
+        self.build_taskfile(ctx, &taskfile)?;
+        ctx.taskfile_dir = old_taskfile_dir;
+        ctx.tasks_namespace = old_tasks_namespace;
+
         Ok(())
     }
 
     fn build_taskfile_tasks(
         &self,
-        ctx: &TaskMgrBuilderBuildingContext,
+        ctx: &mut TaskMgrBuilderBuildingContext,
         tasks: &[taskfile::Task],
     ) -> Result<()> {
         for t in tasks {
@@ -85,9 +131,21 @@ impl TaskMgrBuilder {
 
     fn build_taskfile_task(
         &self,
-        _ctx: &TaskMgrBuilderBuildingContext,
-        _task: &taskfile::Task,
+        ctx: &mut TaskMgrBuilderBuildingContext,
+        task: &taskfile::Task,
     ) -> Result<()> {
+        let task_name = if !ctx.tasks_namespace.is_empty() {
+            format!("{}:{}", ctx.tasks_namespace, task.name)
+        } else {
+            task.name.clone()
+        };
+
+        ctx.tasks.push(Task {
+            name: task_name,
+            desc: task.desc.clone(),
+            command: task.command.clone(),
+        });
+
         Ok(())
     }
 }
@@ -98,7 +156,21 @@ impl TaskMgr {
     }
 
     pub(crate) fn list(&self) -> Result<()> {
-        for _task in &self.tasks {}
+        let task_name = |task: &Task| format!("{}", task.name.green());
+        let maxwidth = self
+            .tasks
+            .iter()
+            .map(|task| task_name(task).len())
+            .max()
+            .unwrap_or(0);
+
+        log::info!("Available tasks for this project:");
+        for task in &self.tasks {
+            let task_name = format!("{:<width$}", task_name(task), width = maxwidth);
+            let task_desc = format!("# {}", task.desc);
+            log::info!("{} {} {}", "*".yellow(), task_name, task_desc);
+        }
+
         Ok(())
     }
 

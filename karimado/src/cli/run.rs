@@ -25,9 +25,8 @@ impl RunCommand {
         let config = config::from_config_file(&config_file_path)?;
 
         let taskfile = config.tasks.taskfile;
-        let taskfile_path = root_path.join(taskfile);
         let taskmgr = tasks::TaskMgr::builder()
-            .taskfile(&taskfile_path)
+            .taskfile(&taskfile)
             .workdir(&root_path)
             .build()?;
 

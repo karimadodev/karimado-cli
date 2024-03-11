@@ -144,6 +144,7 @@ impl TaskMgrBuilder {
             name: task_name,
             desc: task.desc.clone(),
             command: task.command.clone(),
+            current_dir: self.workdir.clone(),
         });
 
         Ok(())
@@ -183,8 +184,8 @@ impl TaskMgr {
         let tasks = self.lookup_tasks(task_names)?;
         for task in tasks {
             log::info!("$ {}", task.command);
-
             let mut cmd = Command::new(&task.command)
+                .current_dir(&task.current_dir)
                 .spawn()
                 .expect("failed to execute command");
             match cmd.wait()?.code() {

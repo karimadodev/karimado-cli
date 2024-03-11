@@ -1,5 +1,3 @@
-use std::process;
-
 pub(crate) struct Command {
     command: String,
 }
@@ -12,16 +10,16 @@ impl Command {
     }
 
     #[cfg(unix)]
-    pub(crate) fn spawn(&self) -> std::io::Result<process::Child> {
-        process::Command::new("/bin/sh")
+    pub(crate) fn spawn(&self) -> std::io::Result<std::process::Child> {
+        std::process::Command::new("sh")
             .arg("-c")
             .arg(&self.command)
             .spawn()
     }
 
     #[cfg(window)]
-    pub(crate) fn spawn(&self) -> std::io::Result<process::Child> {
-        process::Command::new("cmd.exe")
+    pub(crate) fn spawn(&self) -> std::io::Result<std::process::Child> {
+        std::process::Command::new("cmd.exe")
             .arg("/c")
             .arg(&self.command)
             .spawn()

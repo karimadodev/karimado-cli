@@ -11,7 +11,7 @@ use url::Url;
 use crate::core::archive;
 
 pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
-    let archive_url = String::from(url.clone());
+    let archive_url = url.clone().to_string();
     let mut response = https_get(&archive_url)?;
 
     let archive_name: String = iter::repeat_with(alphanumeric).take(8).collect();

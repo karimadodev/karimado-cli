@@ -8,7 +8,7 @@ use std::{
 use url::Url;
 
 pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
-    let repo_url = String::from(url.clone());
+    let repo_url = url.clone().to_string();
     let repo_url = repo_url.replace("git+https://", "https://");
 
     let repo_name: String = iter::repeat_with(alphanumeric).take(8).collect();
@@ -20,7 +20,7 @@ pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
         repo.checkout_tree(&object, None)?;
 
         match reference {
-            Some(r) => repo.set_head(r.name().unwrap()),
+            Some(r) => repo.set_head(r.name().expect("invalid reference name")),
             None => repo.set_head_detached(object.id()),
         }?;
     }

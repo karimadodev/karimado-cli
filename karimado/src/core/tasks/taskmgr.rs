@@ -184,7 +184,9 @@ impl TaskMgr {
         for task in tasks {
             log::info!("$ {}", task.command);
 
-            let mut cmd = Command::new(&task.command).spawn().unwrap();
+            let mut cmd = Command::new(&task.command)
+                .spawn()
+                .expect("failed to execute command");
             match cmd.wait()?.code() {
                 Some(0) => {
                     log::info!("");

@@ -30,14 +30,17 @@ impl RunCommand {
             .workdir(&root_path)
             .build()?;
 
-        if self.list {
+        if self.list || self.task.is_empty() {
             taskmgr.list()?;
-        } else if self.parallel {
-            taskmgr.parallel_execute()?;
-        } else {
-            taskmgr.execute()?;
+            return Ok(());
         }
 
-        Ok(())
+        if self.parallel {
+            taskmgr.parallel_execute(&self.task)?;
+            Ok(())
+        } else {
+            taskmgr.execute(&self.task)?;
+            Ok(())
+        }
     }
 }

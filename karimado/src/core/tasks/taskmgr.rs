@@ -2,7 +2,7 @@ use anyhow::Result;
 use colored::Colorize;
 use std::path::{Path, PathBuf};
 
-use super::{task::Task, taskfile};
+use super::{command::Command, task::Task, taskfile};
 
 pub(crate) struct TaskMgr {
     tasks: Vec<Task>,
@@ -40,7 +40,7 @@ impl TaskMgrBuilder {
         let mut ctx: TaskMgrBuilderBuildingContext = Default::default();
         let taskfile_path = self.workdir.join(&self.taskfile);
 
-        log::debug!("Parsing taskfile {}", taskfile_path.display());
+        log::debug!("parsing taskfile {}", taskfile_path.display());
         let taskfile = taskfile::from_taskfile(&taskfile_path)?;
 
         ctx.tasks_namespace = String::new();
@@ -70,8 +70,8 @@ impl TaskMgrBuilder {
         ctx: &mut TaskMgrBuilderBuildingContext,
         includes: &[taskfile::Include],
     ) -> Result<()> {
-        for i in includes {
-            self.build_taskfile_include(ctx, i)?;
+        for include in includes {
+            self.build_taskfile_include(ctx, include)?;
         }
         Ok(())
     }
@@ -93,7 +93,7 @@ impl TaskMgrBuilder {
             );
         }
 
-        log::debug!("Parsing taskfile {}", taskfile_path.display());
+        log::debug!("parsing taskfile {}", taskfile_path.display());
         let taskfile = taskfile::from_taskfile(&taskfile_path)?;
 
         let old_tasks_namespace = ctx.tasks_namespace.clone();
@@ -123,8 +123,8 @@ impl TaskMgrBuilder {
         ctx: &mut TaskMgrBuilderBuildingContext,
         tasks: &[taskfile::Task],
     ) -> Result<()> {
-        for t in tasks {
-            self.build_taskfile_task(ctx, t)?;
+        for task in tasks {
+            self.build_taskfile_task(ctx, task)?;
         }
         Ok(())
     }
@@ -174,13 +174,42 @@ impl TaskMgr {
         Ok(())
     }
 
-    pub(crate) fn parallel_execute(&self) -> Result<()> {
-        eprintln!("Executes tasks provided on command line in parallel");
+    pub(crate) fn parallel_execute(&self, task_names: &[String]) -> Result<()> {
+        let _ = self.lookup_tasks(task_names)?;
         Ok(())
     }
 
-    pub(crate) fn execute(&self) -> Result<()> {
-        eprintln!("Executes tasks provided on command line");
+    pub(crate) fn execute(&self, task_names: &[String]) -> Result<()> {
+        let tasks = self.lookup_tasks(task_names)?;
+        for task in tasks {
+            log::info!("$ {}", task.command);
+
+            let mut cmd = Command::new(&task.command).spawn().unwrap();
+            match cmd.wait()?.code() {
+                Some(0) => {
+                    log::info!("");
+                }
+                Some(code) => {
+                    anyhow::bail!("failed to run task `{}`: exit status {}", task.name, code)
+                }
+                None => {
+                    anyhow::bail!("failed to run task `{}`: exit status unknown", task.name)
+                }
+            }
+        }
         Ok(())
+    }
+
+    fn lookup_tasks(&self, task_names: &[String]) -> Result<Vec<Task>> {
+        let mut tasks: Vec<Task> = vec![];
+        for task_name in task_names {
+            let task = self.tasks.iter().find(|task| task.name == *task_name);
+            if let Some(task) = task {
+                tasks.push(task.clone());
+            } else {
+                anyhow::bail!("task `{}` does not exists", task_name);
+            }
+        }
+        Ok(tasks)
     }
 }

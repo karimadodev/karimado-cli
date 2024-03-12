@@ -46,7 +46,7 @@ impl TaskMgrBuilder {
         ctx.tasks_namespace = String::new();
         ctx.taskfile_dir = taskfile_path
             .parent()
-            .expect("cannot resolve taskfile_dir")
+            .expect("failed to resolve taskfile dir")
             .to_path_buf();
         self.build_taskfile(&mut ctx, &taskfile)?;
 
@@ -106,7 +106,7 @@ impl TaskMgrBuilder {
         };
         let new_taskfile_dir = taskfile_path
             .parent()
-            .expect("cannot resolve taskfile_dir")
+            .expect("failed to resolve taskfile dir")
             .to_path_buf();
 
         ctx.tasks_namespace = new_tasks_namespace;
@@ -157,7 +157,7 @@ impl TaskMgr {
     }
 
     pub(crate) fn list(&self) -> Result<()> {
-        let task_name = |task: &Task| format!("{}", task.name.green());
+        let task_name = |task: &Task| task.name.green();
         let maxwidth = self
             .tasks
             .iter()
@@ -176,19 +176,45 @@ impl TaskMgr {
     }
 
     pub(crate) fn parallel_execute(&self, task_names: &[String]) -> Result<()> {
-        let _ = self.lookup_tasks(task_names)?;
+        let tasks = self.lookup_tasks(task_names)?;
+
+        let mut children: Vec<std::process::Child> = vec![];
+        for task in tasks {
+            log::info!("$ {}", task.command);
+            children.push(
+                Command::new(&task.command)
+                    .current_dir(&task.current_dir)
+                    .spawn()
+                    .expect("failed to execute command"),
+            )
+        }
+
+        let mut thrs: Vec<std::thread::JoinHandle<_>> = vec![];
+        for mut child in children {
+            thrs.push(std::thread::spawn(move || {
+                let status = child.wait().expect("command wasn't running");
+                log::debug!("{:?}", status.code());
+            }));
+        }
+
+        for thr in thrs {
+            thr.join().expect("failed to join on the associated thread");
+        }
+
         Ok(())
     }
 
     pub(crate) fn execute(&self, task_names: &[String]) -> Result<()> {
         let tasks = self.lookup_tasks(task_names)?;
+
         for task in tasks {
             log::info!("$ {}", task.command);
-            let mut cmd = Command::new(&task.command)
+            let mut child = Command::new(&task.command)
                 .current_dir(&task.current_dir)
                 .spawn()
                 .expect("failed to execute command");
-            match cmd.wait()?.code() {
+
+            match child.wait()?.code() {
                 Some(0) => {
                     log::info!("");
                 }
@@ -200,6 +226,7 @@ impl TaskMgr {
                 }
             }
         }
+
         Ok(())
     }
 

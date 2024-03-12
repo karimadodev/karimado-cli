@@ -1,161 +1,14 @@
 use anyhow::Result;
 use colored::Colorize;
-use std::path::{Path, PathBuf};
+use std::io::BufRead;
 
-use super::{command::Command, task::Task, taskfile};
+use super::{command, task::Task};
 
 pub(crate) struct TaskMgr {
-    tasks: Vec<Task>,
-}
-
-#[derive(Default)]
-pub(crate) struct TaskMgrBuilder {
-    taskfile: String,
-    workdir: PathBuf,
-}
-
-#[derive(Default)]
-struct TaskMgrBuilderBuildingContext {
-    tasks: Vec<Task>,
-    tasks_namespace: String,
-    taskfile_dir: PathBuf,
-}
-
-impl TaskMgrBuilder {
-    pub(crate) fn new() -> Self {
-        Default::default()
-    }
-
-    pub(crate) fn taskfile(mut self, taskfile: &str) -> Self {
-        self.taskfile = taskfile.to_string();
-        self
-    }
-
-    pub(crate) fn workdir(mut self, workdir: &Path) -> Self {
-        self.workdir = workdir.to_path_buf();
-        self
-    }
-
-    pub(crate) fn build(self) -> Result<TaskMgr> {
-        let mut ctx: TaskMgrBuilderBuildingContext = Default::default();
-        let taskfile_path = self.workdir.join(&self.taskfile);
-
-        log::debug!("parsing taskfile {}", taskfile_path.display());
-        let taskfile = taskfile::from_taskfile(&taskfile_path)?;
-
-        ctx.tasks_namespace = String::new();
-        ctx.taskfile_dir = taskfile_path
-            .parent()
-            .expect("failed to resolve taskfile dir")
-            .to_path_buf();
-        self.build_taskfile(&mut ctx, &taskfile)?;
-
-        let mut tasks = ctx.tasks;
-        tasks.sort_by(|a, b| a.name.cmp(&b.name));
-        Ok(TaskMgr { tasks })
-    }
-
-    fn build_taskfile(
-        &self,
-        ctx: &mut TaskMgrBuilderBuildingContext,
-        taskfile: &taskfile::Taskfile,
-    ) -> Result<()> {
-        self.build_taskfile_includes(ctx, &taskfile.includes)?;
-        self.build_taskfile_tasks(ctx, &taskfile.tasks)?;
-        Ok(())
-    }
-
-    fn build_taskfile_includes(
-        &self,
-        ctx: &mut TaskMgrBuilderBuildingContext,
-        includes: &[taskfile::Include],
-    ) -> Result<()> {
-        for include in includes {
-            self.build_taskfile_include(ctx, include)?;
-        }
-        Ok(())
-    }
-
-    fn build_taskfile_include(
-        &self,
-        ctx: &mut TaskMgrBuilderBuildingContext,
-        include: &taskfile::Include,
-    ) -> Result<()> {
-        let taskfile_path = ctx.taskfile_dir.join(&include.taskfile);
-        if !taskfile_path.exists() {
-            if include.optional {
-                return Ok(());
-            }
-            anyhow::bail!(
-                "taskfile `{}` does not exists under {}",
-                include.taskfile,
-                ctx.taskfile_dir.display()
-            );
-        }
-
-        log::debug!("parsing taskfile {}", taskfile_path.display());
-        let taskfile = taskfile::from_taskfile(&taskfile_path)?;
-
-        let old_tasks_namespace = ctx.tasks_namespace.clone();
-        let old_taskfile_dir = ctx.taskfile_dir.clone();
-
-        let new_tasks_namespace = if !ctx.tasks_namespace.is_empty() {
-            format!("{}:{}", ctx.tasks_namespace, include.name)
-        } else {
-            include.name.to_string()
-        };
-        let new_taskfile_dir = taskfile_path
-            .parent()
-            .expect("failed to resolve taskfile dir")
-            .to_path_buf();
-
-        ctx.tasks_namespace = new_tasks_namespace;
-        ctx.taskfile_dir = new_taskfile_dir;
-        self.build_taskfile(ctx, &taskfile)?;
-        ctx.taskfile_dir = old_taskfile_dir;
-        ctx.tasks_namespace = old_tasks_namespace;
-
-        Ok(())
-    }
-
-    fn build_taskfile_tasks(
-        &self,
-        ctx: &mut TaskMgrBuilderBuildingContext,
-        tasks: &[taskfile::Task],
-    ) -> Result<()> {
-        for task in tasks {
-            self.build_taskfile_task(ctx, task)?;
-        }
-        Ok(())
-    }
-
-    fn build_taskfile_task(
-        &self,
-        ctx: &mut TaskMgrBuilderBuildingContext,
-        task: &taskfile::Task,
-    ) -> Result<()> {
-        let task_name = if !ctx.tasks_namespace.is_empty() {
-            format!("{}:{}", ctx.tasks_namespace, task.name)
-        } else {
-            task.name.clone()
-        };
-
-        ctx.tasks.push(Task {
-            name: task_name,
-            command: task.command.clone(),
-            description: task.description.clone(),
-            current_dir: self.workdir.clone(),
-        });
-
-        Ok(())
-    }
+    pub(super) tasks: Vec<Task>,
 }
 
 impl TaskMgr {
-    pub(crate) fn builder() -> TaskMgrBuilder {
-        TaskMgrBuilder::new()
-    }
-
     pub(crate) fn list(&self) -> Result<()> {
         let task_name = |task: &Task| task.name.green();
         let maxwidth = self
@@ -176,30 +29,65 @@ impl TaskMgr {
     }
 
     pub(crate) fn parallel_execute(&self, task_names: &[String]) -> Result<()> {
+        let task_name = |task: &Task| format!("{} |", task.name).green();
+        let maxwidth = self
+            .tasks
+            .iter()
+            .map(|task| task_name(task).len())
+            .max()
+            .unwrap_or(0);
+
         let tasks = self.lookup_tasks(task_names)?;
+        let mut stdout_thrs: Vec<std::thread::JoinHandle<()>> = vec![];
+        let mut stderr_thrs: Vec<std::thread::JoinHandle<()>> = vec![];
+        let mut waiter_thrs: Vec<std::thread::JoinHandle<()>> = vec![];
 
-        let mut children: Vec<std::process::Child> = vec![];
         for task in tasks {
-            log::info!("$ {}", task.command);
-            children.push(
-                Command::new(&task.command)
-                    .current_dir(&task.current_dir)
-                    .spawn()
-                    .expect("failed to execute command"),
-            )
-        }
+            log::info!(
+                "{:>width$} {}",
+                task_name(&task),
+                format!("$ {}", task.command),
+                width = maxwidth
+            );
+            let mut child = command::command(&task.command)
+                .current_dir(&task.current_dir)
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::piped())
+                .spawn()
+                .expect("failed to execute command");
 
-        let mut thrs: Vec<std::thread::JoinHandle<_>> = vec![];
-        for mut child in children {
-            thrs.push(std::thread::spawn(move || {
-                let status = child.wait().expect("command wasn't running");
-                log::debug!("{:?}", status.code());
+            let stdout_task_name = task_name(&task);
+            let stdout_reader =
+                std::io::BufReader::new(child.stdout.take().expect("failed to take stdout"));
+            stdout_thrs.push(std::thread::spawn(move || {
+                for line in stdout_reader.lines().map_while(Result::ok) {
+                    log::info!("{:>width$} {}", stdout_task_name, line, width = maxwidth);
+                }
+            }));
+
+            let stderr_task_name = task_name(&task);
+            let stderr_reader =
+                std::io::BufReader::new(child.stderr.take().expect("failed to take stderr"));
+            stderr_thrs.push(std::thread::spawn(move || {
+                for line in stderr_reader.lines().map_while(Result::ok) {
+                    log::info!("{:>width$} {}", stderr_task_name, line, width = maxwidth);
+                }
+            }));
+
+            waiter_thrs.push(std::thread::spawn(move || {
+                let _status = child.wait().expect("command wasn't running");
             }));
         }
 
-        for thr in thrs {
-            thr.join().expect("failed to join on the associated thread");
-        }
+        stdout_thrs
+            .into_iter()
+            .for_each(move |thr| thr.join().expect("failed to join on the associated thread"));
+        stderr_thrs
+            .into_iter()
+            .for_each(move |thr| thr.join().expect("failed to join on the associated thread"));
+        waiter_thrs
+            .into_iter()
+            .for_each(move |thr| thr.join().expect("failed to join on the associated thread"));
 
         Ok(())
     }
@@ -209,7 +97,7 @@ impl TaskMgr {
 
         for task in tasks {
             log::info!("$ {}", task.command);
-            let mut child = Command::new(&task.command)
+            let mut child = command::command(&task.command)
                 .current_dir(&task.current_dir)
                 .spawn()
                 .expect("failed to execute command");

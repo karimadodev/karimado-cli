@@ -19,6 +19,7 @@ pub(crate) struct Web {
 #[serde(deny_unknown_fields)]
 pub(crate) struct WebScaffold {
     pub(crate) url: Url,
+    #[serde(default)]
     pub(crate) template_path: String,
 }
 
@@ -33,5 +34,6 @@ pub(crate) struct Server {
 #[serde(deny_unknown_fields)]
 pub(crate) struct ServerScaffold {
     pub(crate) url: Url,
+    #[serde(default)]
     pub(crate) template_path: String,
 }

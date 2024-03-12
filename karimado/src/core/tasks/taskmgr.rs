@@ -142,8 +142,8 @@ impl TaskMgrBuilder {
 
         ctx.tasks.push(Task {
             name: task_name,
-            desc: task.desc.clone(),
             command: task.command.clone(),
+            description: task.description.clone(),
             current_dir: self.workdir.clone(),
         });
 
@@ -168,7 +168,7 @@ impl TaskMgr {
         log::info!("Available tasks for this project:");
         for task in &self.tasks {
             let task_name = format!("{:<width$}", task_name(task), width = maxwidth);
-            let task_desc = format!("# {}", task.desc);
+            let task_desc = format!("# {}", task.description.as_ref().unwrap_or(&task.command));
             log::info!("{} {} {}", "*".yellow(), task_name, task_desc);
         }
 

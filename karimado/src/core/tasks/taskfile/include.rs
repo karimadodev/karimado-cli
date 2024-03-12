@@ -5,5 +5,6 @@ use serde::Deserialize;
 pub(crate) struct Include {
     pub(crate) name: String,
     pub(crate) taskfile: String,
+    #[serde(default)]
     pub(crate) optional: bool,
 }

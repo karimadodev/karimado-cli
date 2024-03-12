@@ -1,4 +1,4 @@
-mod command;
+mod shell;
 mod task;
 mod taskfile;
 mod taskmgr;

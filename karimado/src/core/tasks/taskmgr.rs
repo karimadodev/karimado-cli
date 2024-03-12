@@ -2,7 +2,7 @@ use anyhow::Result;
 use colored::Colorize;
 use std::io::BufRead;
 
-use super::{command, task::Task};
+use super::{shell, task::Task};
 
 pub(crate) struct TaskMgr {
     pub(super) tasks: Vec<Task>,
@@ -49,7 +49,7 @@ impl TaskMgr {
                 format!("$ {}", task.command),
                 width = maxwidth
             );
-            let mut child = command::command(&task.command)
+            let mut child = shell::command(&task.command)
                 .current_dir(&task.current_dir)
                 .stdout(std::process::Stdio::piped())
                 .stderr(std::process::Stdio::piped())
@@ -97,7 +97,7 @@ impl TaskMgr {
 
         for task in tasks {
             log::info!("$ {}", task.command);
-            let mut child = command::command(&task.command)
+            let mut child = shell::command(&task.command)
                 .current_dir(&task.current_dir)
                 .spawn()
                 .expect("failed to execute command");

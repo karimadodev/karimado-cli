@@ -13,6 +13,7 @@ clap-verbosity-flag = "2.2.0"
 colored = "2.1.0"
 env_logger = "0.11.2"
 fastrand = "2.0.1"
+flurry = "0.5.0"
 git2 = "0.18.2"
 globset = "0.4.14"
 infer = "0.15.0"
@@ -21,6 +22,7 @@ path-absolutize = "3.1.1"
 reqwest = { version = "0.11.24", features = ["blocking"] }
 rust-embed = "8.2.0"
 serde = { version = "1.0.196", features = ["derive"] }
+shared_child = "1.0.0"
 strum = { version = "0.26.1", features = ["derive"] }
 toml = "0.8.10"
 url = { version = "2.5.0", features = ["serde"] }

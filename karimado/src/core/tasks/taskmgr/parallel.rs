@@ -12,7 +12,7 @@ use std::{
 use super::super::{shell, task::Task};
 
 pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
-    let colored_task_name = |name: &str| format!("{} |", name).purple();
+    let colored_task_name = |name: &str| format!(" {} |", name).purple();
     let maxwidth = tasks
         .iter()
         .map(|task| colored_task_name(&task.name).len())
@@ -23,7 +23,7 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
     let mut stderr_thrs: Vec<thread::JoinHandle<()>> = vec![];
     let mut waiter_thrs: Vec<thread::JoinHandle<()>> = vec![];
 
-    let (tx, rx) = mpsc::channel::<(i32, usize, i32)>();
+    let (tx, rx) = mpsc::channel::<i32>();
     let children: HashMap<usize, (String, Arc<SharedChild>)> = HashMap::with_capacity(tasks.len());
 
     // children: spawn all tasks
@@ -69,7 +69,7 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
             let code = status.code().unwrap_or(-1);
             match code {
                 0 => (),
-                _ => _ = waiter_tx.send((1, task_id, code)),
+                _ => _ = waiter_tx.send(1),
             }
         }));
 
@@ -82,31 +82,37 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
 
     // watcher: collect all tasks's result -> retval
     let watcher_retval = Arc::clone(&retval);
+    let watcher_reap = move || {
+        for (_task_id, (task_name, child)) in &children.pin() {
+            let status = child.try_wait().expect("failed to try wait");
+
+            // unfinished tasks: force kill
+            if status.is_none() {
+                let watcher_task_name = colored_task_name(task_name);
+                let line = format!("terminating `{}`", task_name);
+                log::info!("{:>w$} {}", watcher_task_name, line.yellow(), w = maxwidth);
+                child.kill().expect("failed to kill command");
+                continue;
+            }
+
+            // finished tasks: succeed/failed
+            let code = status.expect("Option::unwrap()").code().unwrap_or(-1);
+            if code != 0 {
+                let watcher_task_name = colored_task_name(task_name);
+                let line = format!("failed to run task `{}`: exit code {}", task_name, code);
+                log::info!("{:>w$} {}", watcher_task_name, line.red(), w = maxwidth);
+                *watcher_retval.lock().expect("failed to lock data") = line.to_string();
+            }
+        }
+    };
     let watcher_thr = thread::spawn(move || {
-        let (reason, id, code) = rx.recv().expect("failed to recv");
         // reason:
         //   0: all tasks succeed
         //   1: one of the tasks had failed
+        let reason = rx.recv().expect("failed to recv");
         match reason {
             0 => {}
-            1 => {
-                for (task_id, (task_name, child)) in &children.pin() {
-                    // force kill unfinished tasks
-                    if *task_id != id {
-                        let watcher_task_name = colored_task_name(task_name);
-                        let line = format!("terminating `{}`", task_name);
-                        log::info!("{:>w$} {}", watcher_task_name, line.yellow(), w = maxwidth);
-                        child.kill().expect("failed to kill command");
-                        continue;
-                    }
-
-                    // failure task
-                    let watcher_task_name = colored_task_name(task_name);
-                    let line = format!("failed to run task `{}`: exit code {}", task_name, code);
-                    log::info!("{:>w$} {}", watcher_task_name, line.red(), w = maxwidth);
-                    *watcher_retval.lock().expect("failed to lock data") = line.to_string();
-                }
-            }
+            1 => watcher_reap(),
             _ => unreachable!(),
         }
     });
@@ -123,7 +129,7 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         .for_each(move |thr| thr.join().expect("failed to join on the associated thread"));
 
     // watcher:
-    _ = tx.send((0, 0, 0));
+    _ = tx.send(0);
     watcher_thr
         .join()
         .expect("failed to join on the associated thread");

@@ -109,13 +109,19 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         // reason:
         //   0: all tasks succeed
         //   1: one of the tasks had failed
+        //   2: received Ctrl-C signal
         let reason = rx.recv().expect("failed to recv");
         match reason {
             0 => {}
             1 => watcher_reap(),
+            2 => watcher_reap(),
             _ => unreachable!(),
         }
     });
+
+    // ctrlc:
+    let ctrlc_tx = tx.clone();
+    ctrlc::set_handler(move || _ = ctrlc_tx.send(2)).expect("failed to set Ctrl-C handler");
 
     // children: wait for all tasks to be finished or to be killed
     stdout_thrs

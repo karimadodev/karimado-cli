@@ -13,6 +13,7 @@ pub(crate) struct TaskMgrBuilder {
 struct TaskMgrBuilderBuildingContext {
     tasks: Vec<Task>,
     tasks_namespace: String,
+    tasks_workdir: PathBuf,
     taskfile_dir: PathBuf,
 }
 
@@ -39,6 +40,7 @@ impl TaskMgrBuilder {
         let taskfile = taskfile::from_taskfile(&taskfile_path)?;
 
         ctx.tasks_namespace = String::new();
+        ctx.tasks_workdir = self.workdir.clone();
         ctx.taskfile_dir = taskfile_path
             .parent()
             .expect("failed to resolve taskfile dir")
@@ -92,12 +94,18 @@ impl TaskMgrBuilder {
         let taskfile = taskfile::from_taskfile(&taskfile_path)?;
 
         let old_tasks_namespace = ctx.tasks_namespace.clone();
+        let old_tasks_workdir = ctx.tasks_workdir.clone();
         let old_taskfile_dir = ctx.taskfile_dir.clone();
 
-        let new_tasks_namespace = if !ctx.tasks_namespace.is_empty() {
-            format!("{}:{}", ctx.tasks_namespace, include.name)
-        } else {
+        let new_tasks_namespace = if ctx.tasks_namespace.is_empty() {
             include.name.to_string()
+        } else {
+            format!("{}:{}", ctx.tasks_namespace, include.name)
+        };
+        let new_tasks_workdir = if include.working_dir.is_empty() {
+            ctx.tasks_workdir.clone()
+        } else {
+            ctx.tasks_workdir.join(&include.working_dir)
         };
         let new_taskfile_dir = taskfile_path
             .parent()
@@ -105,9 +113,11 @@ impl TaskMgrBuilder {
             .to_path_buf();
 
         ctx.tasks_namespace = new_tasks_namespace;
+        ctx.tasks_workdir = new_tasks_workdir;
         ctx.taskfile_dir = new_taskfile_dir;
         self.build_taskfile(ctx, &taskfile)?;
         ctx.taskfile_dir = old_taskfile_dir;
+        ctx.tasks_workdir = old_tasks_workdir;
         ctx.tasks_namespace = old_tasks_namespace;
 
         Ok(())
@@ -129,17 +139,17 @@ impl TaskMgrBuilder {
         ctx: &mut TaskMgrBuilderBuildingContext,
         task: &taskfile::Task,
     ) -> Result<()> {
-        let task_name = if !ctx.tasks_namespace.is_empty() {
-            format!("{}:{}", ctx.tasks_namespace, task.name)
-        } else {
+        let task_name = if ctx.tasks_namespace.is_empty() {
             task.name.clone()
+        } else {
+            format!("{}:{}", ctx.tasks_namespace, task.name)
         };
 
         ctx.tasks.push(Task {
             name: task_name,
             command: task.command.clone(),
             description: task.description.clone(),
-            current_dir: self.workdir.clone(),
+            current_dir: ctx.tasks_workdir.clone(),
         });
 
         Ok(())

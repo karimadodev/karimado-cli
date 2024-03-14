@@ -6,5 +6,7 @@ pub(crate) struct Include {
     pub(crate) name: String,
     pub(crate) taskfile: String,
     #[serde(default)]
+    pub(crate) working_dir: String,
+    #[serde(default)]
     pub(crate) optional: bool,
 }

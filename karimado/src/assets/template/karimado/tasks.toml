@@ -1,9 +1,11 @@
 [[includes]]
 name = "server"
 taskfile = "tasks/server.toml"
+working_dir = "server"
 optional = true
 
 [[includes]]
 name = "web"
 taskfile = "tasks/web.toml"
+working_dir = "web"
 optional = true

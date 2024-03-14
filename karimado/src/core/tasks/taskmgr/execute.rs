@@ -12,10 +12,11 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
             .expect("failed to execute command");
 
         let status = child.wait().expect("command wasn't running");
-        let code = status.code().unwrap_or(-1);
+        let code = status.code();
         match code {
-            0 => log::info!(""),
-            _ => anyhow::bail!("failed to run task `{}`: exit code {}", task.name, code),
+            Some(0) => log::info!(""),
+            Some(code) => anyhow::bail!("failed to run task `{}`: exit code {}", task.name, code),
+            None => anyhow::bail!("failed to run task `{}`: terminated by signal", task.name),
         }
     }
     Ok(())

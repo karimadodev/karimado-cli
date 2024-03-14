@@ -35,7 +35,10 @@ impl TaskMgr {
             if let Some(task) = task {
                 tasks.push(task.clone());
             } else {
-                anyhow::bail!("task `{}` does not exists", task_name);
+                anyhow::bail!(
+                    "task `{}` does not exists, use the `--list` flag to see all available tasks",
+                    task_name
+                );
             }
         }
         Ok(tasks)

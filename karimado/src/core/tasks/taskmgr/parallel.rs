@@ -11,6 +11,10 @@ use std::{
 
 use super::super::{shell, task::Task};
 
+const TASKS_SUCCESS: i32 = 0; // all tasks succeed
+const TASKS_FAILURE: i32 = 1; // one of the tasks had failed
+const TASKS_CTRL_C_: i32 = 2; // received Ctrl-C signal
+
 pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
     let colored_task_name = |name: &str| format!(" {} |", name).purple();
     let maxwidth = tasks
@@ -64,12 +68,25 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         // child: waiter
         let waiter_tx = tx.clone();
         let waiter_child = child.clone();
+        let waiter_task_name = task_name.clone();
         waiter_thrs.push(thread::spawn(move || {
             let status = waiter_child.wait().expect("command wasn't running");
-            let code = status.code().unwrap_or(-1);
+            let code = status.code();
             match code {
-                0 => (),
-                _ => _ = waiter_tx.send(1),
+                Some(0) => {
+                    let line = "task finished".to_string();
+                    log::info!("{:>w$} {}", waiter_task_name, line.blue(), w = maxwidth);
+                }
+                Some(code) => {
+                    let line = format!("task failed with status code {}", code);
+                    log::info!("{:>w$} {}", waiter_task_name, line.red(), w = maxwidth);
+                    _ = waiter_tx.send(TASKS_FAILURE)
+                }
+                None => {
+                    let line = "task terminated".to_string();
+                    log::info!("{:>w$} {}", waiter_task_name, line.yellow(), w = maxwidth);
+                    _ = waiter_tx.send(TASKS_FAILURE)
+                }
             }
         }));
 
@@ -79,49 +96,59 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
 
     // retval:
     let retval = Arc::new(Mutex::new(String::new()));
+    let retval_init = |retval: &Arc<Mutex<String>>, err: &str| {
+        let mut retval = retval.lock().expect("failed to lock data");
+        if (*retval).is_empty() {
+            *retval = err.to_string();
+        };
+    };
 
     // watcher: collect all tasks's result -> retval
     let watcher_retval = Arc::clone(&retval);
-    let watcher_reap = move || {
+    let watcher_reap = move |reason| {
+        if reason == TASKS_CTRL_C_ {
+            let err = "failed to run tasks: received Ctrl-C signal";
+            retval_init(&watcher_retval, err);
+        }
+
         for (_task_id, (task_name, child)) in &children.pin() {
             let status = child.try_wait().expect("failed to try wait");
 
             // unfinished tasks: force kill
             if status.is_none() {
-                let watcher_task_name = colored_task_name(task_name);
-                let line = format!("terminating `{}`", task_name);
-                log::info!("{:>w$} {}", watcher_task_name, line.yellow(), w = maxwidth);
                 child.kill().expect("failed to kill command");
                 continue;
             }
 
-            // finished tasks: succeed/failed
-            let code = status.expect("Option::unwrap()").code().unwrap_or(-1);
-            if code != 0 {
-                let watcher_task_name = colored_task_name(task_name);
-                let line = format!("failed to run task `{}`: exit code {}", task_name, code);
-                log::info!("{:>w$} {}", watcher_task_name, line.red(), w = maxwidth);
-                *watcher_retval.lock().expect("failed to lock data") = line.to_string();
+            // finished tasks:
+            let code = status.expect("Option::unwrap()").code();
+            match code {
+                Some(0) => {}
+                Some(code) => {
+                    let err = format!("failed to run task `{}`: exit code {}", task_name, code);
+                    retval_init(&watcher_retval, &err);
+                }
+                None => {
+                    let err = format!("failed to run task `{}`: terminated by signal", task_name);
+                    retval_init(&watcher_retval, &err);
+                }
             }
         }
     };
     let watcher_thr = thread::spawn(move || {
-        // reason:
-        //   0: all tasks succeed
-        //   1: one of the tasks had failed
-        //   2: received Ctrl-C signal
         let reason = rx.recv().expect("failed to recv");
         match reason {
-            0 => {}
-            1 => watcher_reap(),
-            2 => watcher_reap(),
+            TASKS_SUCCESS => {}
+            TASKS_FAILURE => watcher_reap(reason),
+            TASKS_CTRL_C_ => watcher_reap(reason),
             _ => unreachable!(),
         }
     });
 
     // ctrlc:
     let ctrlc_tx = tx.clone();
-    ctrlc::set_handler(move || _ = ctrlc_tx.send(2)).expect("failed to set Ctrl-C handler");
+    ctrlc::set_handler(move || _ = ctrlc_tx.send(TASKS_CTRL_C_))
+        .expect("failed to set Ctrl-C handler");
 
     // children: wait for all tasks to be finished or to be killed
     stdout_thrs
@@ -135,7 +162,7 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         .for_each(move |thr| thr.join().expect("failed to join on the associated thread"));
 
     // watcher:
-    _ = tx.send(0);
+    _ = tx.send(TASKS_SUCCESS);
     watcher_thr
         .join()
         .expect("failed to join on the associated thread");

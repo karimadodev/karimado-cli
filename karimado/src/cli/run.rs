@@ -27,20 +27,26 @@ impl RunCommand {
 
         let taskfile = config.tasks.taskfile;
         let taskmgr = karimado_tasks::TaskMgr::builder()
+            .current_dir(&root_path)
             .taskfile(&taskfile)
-            .workdir(&root_path)
             .build()?;
 
         if self.list || self.task.is_empty() {
-            taskmgr.list()?;
+            taskmgr.list();
             return Ok(());
         }
 
-        if self.parallel {
-            taskmgr.parallel_execute(&self.task)?;
-            Ok(())
+        let result = if self.parallel {
+            taskmgr.parallel_execute(&self.task)
         } else {
-            taskmgr.execute(&self.task)?;
+            taskmgr.execute(&self.task)
+        };
+        if let Err(err) = result {
+            if let karimado_tasks::Error::TaskNotFound(_) = err {
+                taskmgr.list()
+            }
+            anyhow::bail!(err)
+        } else {
             Ok(())
         }
     }

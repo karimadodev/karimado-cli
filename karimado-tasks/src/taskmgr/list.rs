@@ -1,9 +1,8 @@
-use anyhow::Result;
 use colored::Colorize;
 
-use super::super::task::Task;
+use crate::task::Task;
 
-pub(crate) fn list(tasks: &[Task]) -> Result<()> {
+pub(crate) fn list(tasks: &[Task]) {
     let colored_task_name = |name: &str| name.green();
     let maxwidth = tasks
         .iter()
@@ -18,5 +17,4 @@ pub(crate) fn list(tasks: &[Task]) -> Result<()> {
         let task_desc = format!("# {}", task.description.as_ref().unwrap_or(&task.command));
         log::info!("{} {} {}", task_icon, task_name, task_desc);
     }
-    Ok(())
 }

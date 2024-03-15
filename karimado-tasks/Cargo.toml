@@ -14,4 +14,5 @@ flurry = "0.5.0"
 log = "0.4.21"
 serde = { version = "1.0.196", features = ["derive"] }
 shared_child = "1.0.0"
+thiserror = "1.0.58"
 toml = "0.8.10"

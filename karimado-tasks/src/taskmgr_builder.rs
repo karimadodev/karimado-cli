@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::path::{Path, PathBuf};
 
-use super::{task::Task, taskfile, taskmgr::TaskMgr};
+use crate::{task::Task, taskfile, taskmgr::TaskMgr};
 
 #[derive(Default)]
 pub struct TaskMgrBuilder {
@@ -27,7 +27,7 @@ impl TaskMgrBuilder {
         self
     }
 
-    pub fn workdir(mut self, workdir: &Path) -> Self {
+    pub fn current_dir(mut self, workdir: &Path) -> Self {
         self.workdir = workdir.to_path_buf();
         self
     }

@@ -9,7 +9,7 @@ use std::{
     thread,
 };
 
-use super::super::{shell, task::Task};
+use crate::{shell, task::Task};
 
 const TASKS_SUCCESS: i32 = 0; // all tasks succeed
 const TASKS_FAILURE: i32 = 1; // one of the tasks had failed

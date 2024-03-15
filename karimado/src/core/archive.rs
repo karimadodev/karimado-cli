@@ -16,7 +16,7 @@ pub(crate) fn decompress(archive_ppath: &Path, target_path: &Path) -> Result<()>
             Ok(mime_type) => match mime_type {
                 MimeType::Zip => zip::decompress(archive_ppath, target_path)?,
             },
-            Err(..) => anyhow_bail_unknown_mime_type(info.mime_type())?,
+            Err(_) => anyhow_bail_unknown_mime_type(info.mime_type())?,
         },
         None => anyhow_bail_unknown_mime_type("unknown")?,
     };

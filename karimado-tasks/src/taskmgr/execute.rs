@@ -1,7 +1,7 @@
 use anyhow::Result;
 use colored::Colorize;
 
-use super::super::{shell, task::Task};
+use crate::{shell, task::Task};
 
 pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
     for task in tasks {

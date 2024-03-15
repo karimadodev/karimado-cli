@@ -26,7 +26,7 @@ pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
             Scheme::Https => https::download(url, downloads_path)?,
             Scheme::Http => https::download(url, downloads_path)?,
         },
-        Err(..) => anyhow_bail_unknown_scheme(url.scheme())?,
+        Err(_) => anyhow_bail_unknown_scheme(url.scheme())?,
     })
 }
 

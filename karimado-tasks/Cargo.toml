@@ -1,0 +1,17 @@
+[package]
+name = "karimado-tasks"
+version = "0.0.0"
+homepage = "https://github.com/karimadodev/karimado-cli"
+repository = "https://github.com/karimadodev/karimado-cli"
+license = "AGPL-3.0-only"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.79"
+colored = "2.1.0"
+ctrlc = { version = "3.4.4", features = ["termination"] }
+flurry = "0.5.0"
+log = "0.4.21"
+serde = { version = "1.0.196", features = ["derive"] }
+shared_child = "1.0.0"
+toml = "0.8.10"

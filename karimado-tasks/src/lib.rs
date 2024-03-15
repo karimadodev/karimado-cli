@@ -4,4 +4,4 @@ mod taskfile;
 mod taskmgr;
 mod taskmgr_builder;
 
-pub(crate) use taskmgr::TaskMgr;
+pub use taskmgr::TaskMgr;

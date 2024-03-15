@@ -6,23 +6,23 @@ use anyhow::Result;
 
 use super::task::Task;
 
-pub(crate) struct TaskMgr {
+pub struct TaskMgr {
     pub(super) tasks: Vec<Task>,
 }
 
 impl TaskMgr {
-    pub(crate) fn list(&self) -> Result<()> {
+    pub fn list(&self) -> Result<()> {
         list::list(&self.tasks)?;
         Ok(())
     }
 
-    pub(crate) fn parallel_execute(&self, task_names: &[String]) -> Result<()> {
+    pub fn parallel_execute(&self, task_names: &[String]) -> Result<()> {
         let tasks = self.lookup_tasks(task_names)?;
         parallel::execute(&tasks)?;
         Ok(())
     }
 
-    pub(crate) fn execute(&self, task_names: &[String]) -> Result<()> {
+    pub fn execute(&self, task_names: &[String]) -> Result<()> {
         let tasks = self.lookup_tasks(task_names)?;
         execute::execute(&tasks)?;
         Ok(())

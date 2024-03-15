@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use super::{task::Task, taskfile, taskmgr::TaskMgr};
 
 #[derive(Default)]
-pub(crate) struct TaskMgrBuilder {
+pub struct TaskMgrBuilder {
     taskfile: String,
     workdir: PathBuf,
 }
@@ -18,21 +18,21 @@ struct TaskMgrBuilderBuildingContext {
 }
 
 impl TaskMgrBuilder {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Default::default()
     }
 
-    pub(crate) fn taskfile(mut self, taskfile: &str) -> Self {
+    pub fn taskfile(mut self, taskfile: &str) -> Self {
         self.taskfile = taskfile.to_string();
         self
     }
 
-    pub(crate) fn workdir(mut self, workdir: &Path) -> Self {
+    pub fn workdir(mut self, workdir: &Path) -> Self {
         self.workdir = workdir.to_path_buf();
         self
     }
 
-    pub(crate) fn build(self) -> Result<TaskMgr> {
+    pub fn build(self) -> Result<TaskMgr> {
         let mut ctx: TaskMgrBuilderBuildingContext = Default::default();
         let taskfile_path = self.workdir.join(&self.taskfile);
 
@@ -157,7 +157,7 @@ impl TaskMgrBuilder {
 }
 
 impl TaskMgr {
-    pub(crate) fn builder() -> TaskMgrBuilder {
+    pub fn builder() -> TaskMgrBuilder {
         TaskMgrBuilder::new()
     }
 }

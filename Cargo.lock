@@ -826,24 +826,36 @@ dependencies = [
  "clap",
  "clap-verbosity-flag",
  "colored",
- "ctrlc",
  "env_logger",
  "fastrand",
- "flurry",
  "git2",
  "globset",
  "infer",
+ "karimado-tasks",
  "log",
  "path-absolutize",
  "reqwest",
  "rust-embed",
  "serde",
- "shared_child",
  "strum",
  "toml",
  "url",
  "walkdir",
  "zip",
+]
+
+[[package]]
+name = "karimado-tasks"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "colored",
+ "ctrlc",
+ "flurry",
+ "log",
+ "serde",
+ "shared_child",
+ "toml",
 ]
 
 [[package]]

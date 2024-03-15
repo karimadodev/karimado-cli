@@ -1,7 +1,8 @@
 use anyhow::Result;
 use clap::Args;
 
-use crate::{config, contrib, core::tasks};
+use crate::{config, contrib};
+use karimado_tasks;
 
 #[derive(Args)]
 pub(crate) struct RunCommand {
@@ -25,7 +26,7 @@ impl RunCommand {
         let config = config::from_config_file(&config_file_path)?;
 
         let taskfile = config.tasks.taskfile;
-        let taskmgr = tasks::TaskMgr::builder()
+        let taskmgr = karimado_tasks::TaskMgr::builder()
             .taskfile(&taskfile)
             .workdir(&root_path)
             .build()?;

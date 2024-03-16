@@ -17,18 +17,15 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
                 log::info!("");
                 continue;
             }
-            Some(code) => {
-                let errmsg = format!(
-                    "failed to run task `{}`, exited with code {}",
-                    task.name, code
-                );
-                return Err(Error::TaskRunFailed(errmsg));
+            Some(c) => {
+                let e = format!("failed to run task `{}`, exited with code {}", task.name, c);
+                return Err(Error::TaskRunFailed(e));
             }
             None => {
-                let errmsg = format!("faiedl to run task `{}`, terminated by signal", task.name);
-                return Err(Error::TaskRunFailed(errmsg));
+                let e = format!("failed to run task `{}`, terminated by signal", task.name);
+                return Err(Error::TaskRunFailed(e));
             }
-        };
+        }
     }
     Ok(())
 }

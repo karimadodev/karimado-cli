@@ -3,7 +3,6 @@ mod shell;
 mod task;
 mod taskfile;
 mod taskmgr;
-mod taskmgr_builder;
 
 use task::Task;
 

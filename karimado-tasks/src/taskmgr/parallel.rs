@@ -51,13 +51,10 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         let stdout_reader = BufReader::new(child.take_stdout().expect("failed to take stdout"));
         stdout_thrs.push(thread::spawn(move || {
             for line in stdout_reader.lines() {
-                match line {
-                    Ok(line) => {
-                        log::info!("{:>w$} {}", stdout_task_name, line, w = maxwidth);
-                    }
-                    Err(err) => {
-                        log::error!("{:>w$} {}", stdout_task_name, err, w = maxwidth);
-                    }
+                if let Ok(line) = line {
+                    log::info!("{:>w$} {}", stdout_task_name, line, w = maxwidth);
+                } else if let Err(line) = line {
+                    log::warn!("{:>w$} {}", stdout_task_name, line, w = maxwidth);
                 }
             }
         }));
@@ -67,13 +64,10 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         let stderr_reader = BufReader::new(child.take_stderr().expect("failed to take stderr"));
         stderr_thrs.push(thread::spawn(move || {
             for line in stderr_reader.lines() {
-                match line {
-                    Ok(line) => {
-                        log::info!("{:>w$} {}", stderr_task_name, line, w = maxwidth);
-                    }
-                    Err(err) => {
-                        log::error!("{:>w$} {}", stderr_task_name, err, w = maxwidth);
-                    }
+                if let Ok(line) = line {
+                    log::info!("{:>w$} {}", stderr_task_name, line, w = maxwidth);
+                } else if let Err(line) = line {
+                    log::warn!("{:>w$} {}", stderr_task_name, line, w = maxwidth);
                 }
             }
         }));
@@ -90,8 +84,8 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
                     let line = "task finished".to_string();
                     log::info!("{:>w$} {}", waiter_task_name, line.blue(), w = maxwidth);
                 }
-                Some(code) => {
-                    let line = format!("task failed with status code {}", code);
+                Some(c) => {
+                    let line = format!("task exited with code {}", c);
                     log::info!("{:>w$} {}", waiter_task_name, line.red(), w = maxwidth);
                     _ = waiter_tx.send(TASKS_FAILURE)
                 }
@@ -107,16 +101,16 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         children.pin().insert(task_id, (task.name.clone(), child));
     }
 
-    // retval:
+    // retval: the value used to store execution result
     let retval = Arc::new(Mutex::new(String::new()));
-    let retval_init = |retval: &Arc<Mutex<String>>, err: &str| {
+    let retval_init = |retval: &Arc<Mutex<String>>, errmsg: &str| {
         let mut retval = retval.lock().expect("failed to lock data");
         if (*retval).is_empty() {
-            *retval = err.to_string();
+            *retval = errmsg.to_string();
         };
     };
 
-    // watcher: collect all tasks's result -> retval
+    // watcher: collect execution result into retval
     let watcher_retval = Arc::clone(&retval);
     let watcher_reap = move |reason| {
         if reason == TASKS_CTRL_C_ {
@@ -125,35 +119,30 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         }
 
         for (_task_id, (task_name, child)) in &children.pin() {
-            let status = child.try_wait().expect("failed to try wait");
-
             // unfinished tasks: force kill
+            let status = child.try_wait().expect("failed to try wait");
             if status.is_none() {
                 child.kill().expect("failed to kill command");
                 continue;
             }
 
-            // finished tasks:
+            // finished tasks: collect execution result
             let code = status.expect("Option::unwrap()").code();
             match code {
                 Some(0) => {}
-                Some(code) => {
-                    let errmsg = format!(
-                        "failed to run task `{}`, exited with code {}",
-                        task_name, code
-                    );
-                    retval_init(&watcher_retval, &errmsg);
+                Some(c) => {
+                    let e = format!("failed to run task `{}`, exited with code {}", task_name, c);
+                    retval_init(&watcher_retval, &e);
                 }
                 None => {
-                    let errmsg =
-                        format!("failed to run task `{}`, terminated by signal", task_name);
-                    retval_init(&watcher_retval, &errmsg);
+                    let e = format!("failed to run task `{}`, terminated by signal", task_name);
+                    retval_init(&watcher_retval, &e);
                 }
             }
         }
     };
     let watcher_thr = thread::spawn(move || {
-        let reason = rx.recv().expect("failed to recv");
+        let reason = rx.recv().expect("failed to recv"); // peek the first value
         match reason {
             TASKS_SUCCESS => {}
             TASKS_FAILURE => watcher_reap(reason),
@@ -167,7 +156,7 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
     ctrlc::set_handler(move || _ = ctrlc_tx.send(TASKS_CTRL_C_))
         .expect("failed to set Ctrl-C handler");
 
-    // children: wait for all tasks to be finished or to be killed
+    // children: wait for all tasks to be done
     stdout_thrs
         .into_iter()
         .for_each(move |thr| thr.join().expect("failed to join on the associated thread"));

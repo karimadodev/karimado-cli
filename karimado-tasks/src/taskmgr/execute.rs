@@ -1,7 +1,6 @@
-use anyhow::Result;
 use colored::Colorize;
 
-use crate::{shell, task::Task};
+use crate::{error::*, shell, Task};
 
 pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
     for task in tasks {
@@ -14,10 +13,22 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         let status = child.wait().expect("command wasn't running");
         let code = status.code();
         match code {
-            Some(0) => log::info!(""),
-            Some(code) => anyhow::bail!("failed to run task `{}`: exit code {}", task.name, code),
-            None => anyhow::bail!("failed to run task `{}`: terminated by signal", task.name),
-        }
+            Some(0) => {
+                log::info!("");
+                continue;
+            }
+            Some(code) => {
+                let errmsg = format!(
+                    "failed to run task `{}`, exited with code {}",
+                    task.name, code
+                );
+                return Err(Error::TaskRunFailed(errmsg));
+            }
+            None => {
+                let errmsg = format!("faiedl to run task `{}`, terminated by signal", task.name);
+                return Err(Error::TaskRunFailed(errmsg));
+            }
+        };
     }
     Ok(())
 }

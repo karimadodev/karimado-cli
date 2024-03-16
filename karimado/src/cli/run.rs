@@ -43,9 +43,11 @@ impl RunCommand {
         };
         if let Err(err) = result {
             if let karimado_tasks::Error::TaskNotFound(_) = err {
-                taskmgr.list()
+                let errmsg = format!("{}, use the `--list` flag to see all available tasks", err);
+                anyhow::bail!(errmsg);
+            } else {
+                anyhow::bail!(err)
             }
-            anyhow::bail!(err)
         } else {
             Ok(())
         }

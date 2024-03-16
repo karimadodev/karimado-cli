@@ -2,8 +2,7 @@ mod execute;
 mod list;
 mod parallel;
 
-use crate::task::Task;
-use crate::{Error, Result};
+use crate::{error::*, Task};
 
 pub struct TaskMgr {
     pub(super) tasks: Vec<Task>,
@@ -33,8 +32,7 @@ impl TaskMgr {
             if let Some(task) = task {
                 tasks.push(task.clone());
             } else {
-                let err = Error::TaskNotFound(task_name.to_string());
-                return Err(err);
+                return Err(Error::TaskNotFound(task_name.to_string()));
             }
         }
         Ok(tasks)

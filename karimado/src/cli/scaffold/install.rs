@@ -19,10 +19,10 @@ pub(crate) struct InstallCommand {
 
 #[derive(Display)]
 enum ScaffoldKind {
-    #[strum(serialize = "web")]
-    Web,
     #[strum(serialize = "server")]
     Server,
+    #[strum(serialize = "web")]
+    Web,
 }
 
 impl InstallCommand {
@@ -37,19 +37,19 @@ impl InstallCommand {
         fs::create_dir_all(root_path.join("tmp/cache/scaffolds"))?;
         fs::create_dir_all(root_path.join("tmp/downloads"))?;
 
-        self.download_web_scaffold(&config, &root_path)?;
         self.download_server_scaffold(&config, &root_path)?;
+        self.download_web_scaffold(&config, &root_path)?;
 
-        self.install_web_scaffold(&config, &root_path)?;
         self.install_server_scaffold(&config, &root_path)?;
+        self.install_web_scaffold(&config, &root_path)?;
 
         Ok(())
     }
 
-    fn download_web_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
-        match &config.workspace.web {
+    fn download_server_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
+        match &config.workspace.server {
             Some(value) => self.download_scaffold(
-                ScaffoldKind::Web,
+                ScaffoldKind::Server,
                 &value.name,
                 &value.scaffold.url,
                 root_path,
@@ -58,10 +58,10 @@ impl InstallCommand {
         }
     }
 
-    fn download_server_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
-        match &config.workspace.server {
+    fn download_web_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
+        match &config.workspace.web {
             Some(value) => self.download_scaffold(
-                ScaffoldKind::Server,
+                ScaffoldKind::Web,
                 &value.name,
                 &value.scaffold.url,
                 root_path,
@@ -92,10 +92,10 @@ impl InstallCommand {
         Ok(())
     }
 
-    fn install_web_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
-        match &config.workspace.web {
+    fn install_server_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
+        match &config.workspace.server {
             Some(value) => self.install_scaffold(
-                ScaffoldKind::Web,
+                ScaffoldKind::Server,
                 &value.name,
                 &value.scaffold.template_path,
                 root_path,
@@ -104,10 +104,10 @@ impl InstallCommand {
         }
     }
 
-    fn install_server_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
-        match &config.workspace.server {
+    fn install_web_scaffold(&self, config: &Config, root_path: &Path) -> Result<()> {
+        match &config.workspace.web {
             Some(value) => self.install_scaffold(
-                ScaffoldKind::Server,
+                ScaffoldKind::Web,
                 &value.name,
                 &value.scaffold.template_path,
                 root_path,

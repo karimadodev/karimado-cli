@@ -848,7 +848,6 @@ dependencies = [
 name = "karimado-tasks"
 version = "0.0.0"
 dependencies = [
- "anyhow",
  "colored",
  "ctrlc",
  "flurry",

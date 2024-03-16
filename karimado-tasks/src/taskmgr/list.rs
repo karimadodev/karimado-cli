@@ -1,6 +1,6 @@
 use colored::Colorize;
 
-use crate::task::Task;
+use crate::Task;
 
 pub(crate) fn list(tasks: &[Task]) {
     let colored_task_name = |name: &str| name.green();

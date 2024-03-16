@@ -1,7 +1,6 @@
-use anyhow::Result;
 use std::path::{Path, PathBuf};
 
-use crate::{task::Task, taskfile, taskmgr::TaskMgr};
+use crate::{error::*, taskfile, Task, TaskMgr};
 
 #[derive(Default)]
 pub struct TaskMgrBuilder {
@@ -83,11 +82,14 @@ impl TaskMgrBuilder {
             if include.optional {
                 return Ok(());
             }
-            anyhow::bail!(
+            let errmsg = format!(
                 "taskfile `{}` does not exists under {}",
                 include.taskfile,
                 ctx.taskfile_dir.display()
             );
+            return Err(Error::TaskFileParseFailed(
+                TaskFileParseFailedKind::ParseIncludeFailed(errmsg),
+            ));
         }
 
         log::debug!("parsing taskfile {}", taskfile_path.display());

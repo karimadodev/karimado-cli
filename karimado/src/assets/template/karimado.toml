@@ -1,11 +1,11 @@
-[workspace.web]
-name = "arco-design-vue"
-scaffold.url = "git+https://github.com/karimadodev/karimado-web-scaffold-arco-design-vue"
-scaffold.template_path = "template"
-
 [workspace.server]
 name = "rails"
 scaffold.url = "git+https://github.com/karimadodev/karimado-server-scaffold-rails"
+scaffold.template_path = "template"
+
+[workspace.web]
+name = "arco-design-vue"
+scaffold.url = "git+https://github.com/karimadodev/karimado-web-scaffold-arco-design-vue"
 scaffold.template_path = "template"
 
 [tasks]

@@ -1,4 +1,3 @@
-use anyhow::Result;
 use colored::Colorize;
 use flurry::HashMap;
 use shared_child::SharedChild;
@@ -9,7 +8,7 @@ use std::{
     thread,
 };
 
-use crate::{shell, task::Task};
+use crate::{error::*, shell, Task};
 
 const TASKS_SUCCESS: i32 = 0; // all tasks succeed
 const TASKS_FAILURE: i32 = 1; // one of the tasks had failed
@@ -51,8 +50,15 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         let stdout_task_name = task_name.clone();
         let stdout_reader = BufReader::new(child.take_stdout().expect("failed to take stdout"));
         stdout_thrs.push(thread::spawn(move || {
-            for line in stdout_reader.lines().map_while(Result::ok) {
-                log::info!("{:>w$} {}", stdout_task_name, line, w = maxwidth);
+            for line in stdout_reader.lines() {
+                match line {
+                    Ok(line) => {
+                        log::info!("{:>w$} {}", stdout_task_name, line, w = maxwidth);
+                    }
+                    Err(err) => {
+                        log::error!("{:>w$} {}", stdout_task_name, err, w = maxwidth);
+                    }
+                }
             }
         }));
 
@@ -60,8 +66,15 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         let stderr_task_name = task_name.clone();
         let stderr_reader = BufReader::new(child.take_stderr().expect("failed to take stderr"));
         stderr_thrs.push(thread::spawn(move || {
-            for line in stderr_reader.lines().map_while(Result::ok) {
-                log::info!("{:>w$} {}", stderr_task_name, line, w = maxwidth);
+            for line in stderr_reader.lines() {
+                match line {
+                    Ok(line) => {
+                        log::info!("{:>w$} {}", stderr_task_name, line, w = maxwidth);
+                    }
+                    Err(err) => {
+                        log::error!("{:>w$} {}", stderr_task_name, err, w = maxwidth);
+                    }
+                }
             }
         }));
 
@@ -107,7 +120,7 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
     let watcher_retval = Arc::clone(&retval);
     let watcher_reap = move |reason| {
         if reason == TASKS_CTRL_C_ {
-            let err = "failed to run tasks: received Ctrl-C signal";
+            let err = "received Ctrl-C signal";
             retval_init(&watcher_retval, err);
         }
 
@@ -125,12 +138,16 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
             match code {
                 Some(0) => {}
                 Some(code) => {
-                    let err = format!("failed to run task `{}`: exit code {}", task_name, code);
-                    retval_init(&watcher_retval, &err);
+                    let errmsg = format!(
+                        "failed to run task `{}`, exited with code {}",
+                        task_name, code
+                    );
+                    retval_init(&watcher_retval, &errmsg);
                 }
                 None => {
-                    let err = format!("failed to run task `{}`: terminated by signal", task_name);
-                    retval_init(&watcher_retval, &err);
+                    let errmsg =
+                        format!("failed to run task `{}`, terminated by signal", task_name);
+                    retval_init(&watcher_retval, &errmsg);
                 }
             }
         }
@@ -172,6 +189,6 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
     if retval.is_empty() {
         Ok(())
     } else {
-        anyhow::bail!(retval.clone());
+        Err(Error::TaskRunFailed(retval.to_string()))
     }
 }

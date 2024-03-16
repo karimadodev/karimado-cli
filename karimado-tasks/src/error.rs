@@ -18,4 +18,6 @@ pub enum TaskFileParseFailedKind {
     TomlError(#[from] toml::de::Error),
     #[error("{0}")]
     ParseIncludeFailed(String),
+    #[error(transparent)]
+    ParseTaskCommandFailed(#[from] handlebars::RenderError),
 }

@@ -15,6 +15,7 @@ pub struct TaskMgr {
 pub struct TaskMgrBuilder {
     current_dir: PathBuf,
     taskfile: String,
+    cli_args: Vec<String>,
 }
 
 impl TaskMgrBuilder {
@@ -32,8 +33,13 @@ impl TaskMgrBuilder {
         self
     }
 
+    pub fn cli_args(mut self, args: &[String]) -> Self {
+        self.cli_args = args.to_vec();
+        self
+    }
+
     pub fn build(self) -> Result<TaskMgr> {
-        let tasks = build::build(&self.current_dir, &self.taskfile)?;
+        let tasks = build::build(&self.current_dir, &self.taskfile, &self.cli_args)?;
         Ok(TaskMgr { tasks })
     }
 }

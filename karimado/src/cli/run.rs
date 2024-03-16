@@ -17,6 +17,10 @@ pub(crate) struct RunCommand {
     /// Task Name
     #[arg(default_value = "default")]
     task: Vec<String>,
+
+    /// Task Args
+    #[arg(raw = true)]
+    args: Vec<String>,
 }
 
 impl RunCommand {
@@ -29,6 +33,7 @@ impl RunCommand {
         let taskmgr = karimado_tasks::TaskMgr::builder()
             .current_dir(&root_path)
             .taskfile(&taskfile)
+            .cli_args(&self.args)
             .build()?;
 
         if self.list || self.task.is_empty() {

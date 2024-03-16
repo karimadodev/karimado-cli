@@ -1,3 +1,5 @@
+use handlebars::Handlebars;
+use serde_json::json;
 use std::path::{Path, PathBuf};
 
 use crate::{error::*, taskfile, Task};
@@ -6,6 +8,7 @@ use crate::{error::*, taskfile, Task};
 struct BuildingContext {
     // constants
     working_dir: PathBuf,
+    cli_args: String,
 
     // realtime
     tasks_namespace: Vec<String>,
@@ -16,9 +19,10 @@ struct BuildingContext {
     tasks: Vec<Task>,
 }
 
-pub(crate) fn build(current_dir: &Path, taskfile: &str) -> Result<Vec<Task>> {
+pub(crate) fn build(current_dir: &Path, taskfile: &str, cli_args: &[String]) -> Result<Vec<Task>> {
     let mut ctx = BuildingContext {
         working_dir: current_dir.to_path_buf(),
+        cli_args: cli_args.join(" "),
         ..Default::default()
     };
     let taskfile_path = current_dir.join(taskfile);
@@ -63,9 +67,7 @@ fn build_taskfile_include(include: &taskfile::Include, ctx: &mut BuildingContext
         let taskfile = &include.taskfile;
         let dir = ctx.taskfile_dir.display();
         let e = format!("taskfile `{}` does not exists under {}", taskfile, dir);
-        return Err(Error::TaskFileParseFailed(
-            TaskFileParseFailedKind::ParseIncludeFailed(e),
-        ));
+        Err(TaskFileParseFailedKind::ParseIncludeFailed(e))?;
     }
 
     log::debug!("parsing taskfile {}", taskfile_path.display());
@@ -110,7 +112,7 @@ fn build_taskfile_task(task: &taskfile::Task, ctx: &mut BuildingContext) -> Resu
         v.push(task.name.clone());
         v.join(":")
     };
-    let command = task.command.clone();
+    let command = build_taskfile_task_command(&task.command, ctx)?;
     let description = task.description.clone();
     let current_dir = ctx.tasks_cwd.clone();
 
@@ -122,4 +124,15 @@ fn build_taskfile_task(task: &taskfile::Task, ctx: &mut BuildingContext) -> Resu
     });
 
     Ok(())
+}
+
+fn build_taskfile_task_command(command: &str, ctx: &mut BuildingContext) -> Result<String> {
+    let renderer = Handlebars::new();
+    let vars = &json!({
+        "CLI_ARGS": ctx.cli_args
+    });
+    let command = renderer
+        .render_template(command, &vars)
+        .map_err(TaskFileParseFailedKind::ParseTaskCommandFailed)?;
+    Ok(command)
 }

@@ -19,11 +19,7 @@ pub(crate) struct Taskfile {
 }
 
 pub(crate) fn from_taskfile(path: &Path) -> Result<Taskfile> {
-    let data = fs::read_to_string(path)
-        .map_err(TaskFileParseFailedKind::IoError)
-        .map_err(Error::TaskFileParseFailed)?;
-    let taskfile = toml::from_str(&data)
-        .map_err(TaskFileParseFailedKind::TomlError)
-        .map_err(Error::TaskFileParseFailed)?;
+    let data = fs::read_to_string(path).map_err(TaskFileParseFailedKind::IoError)?;
+    let taskfile = toml::from_str(&data).map_err(TaskFileParseFailedKind::TomlError)?;
     Ok(taskfile)
 }

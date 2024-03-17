@@ -9,7 +9,7 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
-      - name: Install stable toolchain
+      - name: Install rust stable toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -29,7 +29,12 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
-      - name: Install stable toolchain
+      - name: Install ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+      - name: Install rust stable toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -47,7 +52,7 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
-      - name: Install stable toolchain
+      - name: Install rust stable toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal

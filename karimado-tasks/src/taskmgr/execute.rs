@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "execute_test.rs"]
+mod tests;
+
 use colored::Colorize;
 
 use crate::{error::*, shell, Task};

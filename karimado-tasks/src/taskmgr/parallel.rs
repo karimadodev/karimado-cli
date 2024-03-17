@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "parallel_test.rs"]
+mod tests;
+
 use colored::Colorize;
 use flurry::HashMap;
 use shared_child::SharedChild;

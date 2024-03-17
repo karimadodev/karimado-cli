@@ -45,7 +45,7 @@ pub fn execute() -> i32 {
     } else {
         None
     };
-    env_logger::Builder::new()
+    env_logger::builder()
         .format_level(debugging)
         .format_target(false)
         .format_timestamp(timestamp)

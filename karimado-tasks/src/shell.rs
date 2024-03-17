@@ -7,7 +7,7 @@ pub(crate) fn command(c: &str) -> Command {
     cmd
 }
 
-#[cfg(window)]
+#[cfg(windows)]
 pub(crate) fn command(c: &str) -> Command {
     let mut cmd = Command::new("cmd.exe");
     cmd.args(["/c", &c]);

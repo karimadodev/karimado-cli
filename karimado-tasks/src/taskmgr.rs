@@ -55,7 +55,7 @@ impl TaskMgr {
 
     pub fn parallel_execute(&self, task_names: &[String]) -> Result<()> {
         let tasks = self.lookup_tasks(task_names)?;
-        parallel::execute(&tasks)
+        parallel::execute(&tasks, true)
     }
 
     pub fn execute(&self, task_names: &[String]) -> Result<()> {

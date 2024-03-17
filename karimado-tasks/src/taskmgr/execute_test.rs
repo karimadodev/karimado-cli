@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 use super::*;
-use crate::Task;
 
 #[test]
 fn ok() {
@@ -25,6 +24,7 @@ fn err_command_not_found() {
 
     let r = execute(&tasks);
     assert!(r.is_err());
+    assert!(matches!(r, Err(Error::TaskRunFailed(_))));
 
     let e = r.unwrap_err().to_string();
     assert!(e.clone().contains("failed to run task"));

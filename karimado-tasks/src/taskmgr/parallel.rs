@@ -18,7 +18,7 @@ const TASKS_SUCCESS: i32 = 0; // all tasks succeed
 const TASKS_FAILURE: i32 = 1; // one of the tasks had failed
 const TASKS_CTRL_C_: i32 = 2; // received Ctrl-C signal
 
-pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
+pub(crate) fn execute(tasks: &[Task], ctrlc: bool) -> Result<()> {
     let colored_task_name = |name: &str| format!(" {} |", name).purple();
     let maxwidth = tasks
         .iter()
@@ -156,9 +156,11 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
     });
 
     // ctrlc:
-    let ctrlc_tx = tx.clone();
-    ctrlc::set_handler(move || _ = ctrlc_tx.send(TASKS_CTRL_C_))
-        .expect("failed to set Ctrl-C handler");
+    if ctrlc {
+        let ctrlc_tx = tx.clone();
+        ctrlc::set_handler(move || _ = ctrlc_tx.send(TASKS_CTRL_C_))
+            .expect("failed to set Ctrl-C handler");
+    }
 
     // children: wait for all tasks to be done
     stdout_thrs

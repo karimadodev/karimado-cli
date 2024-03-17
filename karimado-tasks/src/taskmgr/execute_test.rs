@@ -1,14 +1,9 @@
-use std::path::PathBuf;
-
 use super::*;
+use crate::build_task;
 
 #[test]
 fn ok() {
-    let tasks: Vec<Task> = vec![Task {
-        command: "cargo version".to_string(),
-        current_dir: PathBuf::from("."),
-        ..Default::default()
-    }];
+    let tasks: Vec<Task> = vec![build_task!(command: "cargo version")];
 
     let r = execute(&tasks);
     assert!(r.is_ok());
@@ -16,11 +11,7 @@ fn ok() {
 
 #[test]
 fn err_command_not_found() {
-    let tasks: Vec<Task> = vec![Task {
-        command: "command404".to_string(),
-        current_dir: PathBuf::from("."),
-        ..Default::default()
-    }];
+    let tasks: Vec<Task> = vec![build_task!(command: "command404")];
 
     let r = execute(&tasks);
     assert!(r.is_err());

@@ -1,10 +1,15 @@
 use super::*;
+use crate::build_task;
 
 #[test]
 fn ok() {
-    let tasks_count = 4;
-    let tasks: Vec<Task> = std::iter::repeat(Default::default())
-        .take(tasks_count)
-        .collect();
+    let tasks: Vec<Task> = vec![
+        build_task!(name: "cargo"),
+        build_task!(name: "cargo:new"),
+        build_task!(name: "cargo:install"),
+        build_task!(name: "cargo:run"),
+        build_task!(name: "cargo:run:test"),
+        build_task!(name: "cargo:build"),
+    ];
     list(&tasks);
 }

@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "list_test.rs"]
+mod tests;
+
 use colored::Colorize;
 
 use crate::Task;

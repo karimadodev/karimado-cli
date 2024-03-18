@@ -1,5 +1,9 @@
 use anyhow::Result;
 use clap::Args;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 
 use crate::{config, contrib};
 use karimado_tasks;
@@ -42,10 +46,22 @@ impl RunCommand {
         }
 
         let result = if self.parallel {
-            taskmgr.parallel_execute(&self.task)
+            let terminated = Arc::new(AtomicBool::new(false));
+            let ctrlc_terminated = Arc::clone(&terminated);
+            ctrlc::set_handler(move || ctrlc_terminated.store(true, Ordering::SeqCst))
+                .expect("failed to set Ctrl-C handler");
+
+            taskmgr.parallel_execute(&self.task, move || {
+                if terminated.load(Ordering::SeqCst) {
+                    Some("received Ctrl-C signal".to_string())
+                } else {
+                    None
+                }
+            })
         } else {
             taskmgr.execute(&self.task)
         };
+
         if let Err(err) = result {
             if let karimado_tasks::Error::TaskNotFound(_) = err {
                 let errmsg = format!("{}, use the `--list` flag to see all available tasks", err);

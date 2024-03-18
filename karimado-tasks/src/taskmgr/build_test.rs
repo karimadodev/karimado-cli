@@ -44,12 +44,16 @@ fn ok_taskfile_full() {
     assert_eq!(task.current_dir, current_dir);
 
     // taskfile::Include#working_dir
-    let task = tasks.iter().find(|t| t.name == "cargo:run:new").unwrap();
+    let task = tasks.iter().find(|t| t.name == "cargo:run:run").unwrap();
+    assert_eq!(task.command, "cargo run run");
+    assert_eq!(task.description, Some("Run a defined task".to_string()));
     assert_eq!(task.current_dir, current_dir.join("path-relative-to-cwd"));
 
     // taskfile::Task#command builtin vars
     let task = tasks.iter().find(|t| t.name == "cargo:fmt").unwrap();
     assert_eq!(task.command, "cargo fmt -- --check -v");
+    assert_eq!(task.description, Some("Formats all files".to_string()));
+    assert_eq!(task.current_dir, current_dir);
 }
 
 #[test]

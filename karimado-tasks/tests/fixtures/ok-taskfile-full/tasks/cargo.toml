@@ -21,7 +21,7 @@ description = "Run a binary or example of the local package"
 [[tasks]]
 name = "fmt"
 command = "cargo fmt -- {{CLI_ARGS}}"
-description = "Formats all bin and lib files of the current crate using rustfmt"
+description = "Formats all files"
 
 [[tasks]]
 name = "build"

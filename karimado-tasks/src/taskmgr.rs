@@ -53,9 +53,13 @@ impl TaskMgr {
         list::list(&self.tasks)
     }
 
-    pub fn parallel_execute(&self, task_names: &[String]) -> Result<()> {
+    pub fn parallel_execute<F: Fn() -> Option<String> + Send + 'static>(
+        &self,
+        task_names: &[String],
+        watched: F,
+    ) -> Result<()> {
         let tasks = self.lookup_tasks(task_names)?;
-        parallel::execute(&tasks)
+        parallel::execute(&tasks, watched)
     }
 
     pub fn execute(&self, task_names: &[String]) -> Result<()> {

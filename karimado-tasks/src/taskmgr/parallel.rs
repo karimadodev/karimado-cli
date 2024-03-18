@@ -22,7 +22,10 @@ const TASKS_WAITING: i32 = 0; // waiting to be done
 const TASKS_SUCCESS: i32 = 1; // done: all tasks succeed
 const TASKS_FAILURE: i32 = 2; // done: one of the tasks had failed
 
-pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
+pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
+    tasks: &[Task],
+    watched: F,
+) -> Result<()> {
     let colored_task_name = |name: &str| format!(" {} |", name).purple();
     let maxwidth = tasks
         .iter()
@@ -124,9 +127,8 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         };
     };
 
-    // watcher: periodically check tasks's execution status
-    let watcher_tasks_status = Arc::clone(&tasks_status);
-    let watcher_retval = Arc::clone(&retval);
+    // watcher: the function `watcher_reap` used to cleanup unfinished tasks
+    let watcher_reap_retval = Arc::clone(&retval);
     let watcher_reap = move || {
         for (_task_id, (task_name, child)) in &children.pin() {
             // unfinished tasks: force kill
@@ -136,32 +138,50 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
                 continue;
             }
 
-            // finished tasks: collect execution result
+            // finished tasks: store tasks's execution result
             let code = status.expect("Option::unwrap()").code();
             match code {
                 Some(0) => {}
                 Some(c) => {
                     let e = format!("failed to run task `{}`, exited with code {}", task_name, c);
-                    retval_init(&watcher_retval, &e);
+                    retval_init(&watcher_reap_retval, &e);
                 }
                 None => {
                     let e = format!("failed to run task `{}`, terminated by signal", task_name);
-                    retval_init(&watcher_retval, &e);
+                    retval_init(&watcher_reap_retval, &e);
                 }
             }
         }
     };
-    let watcher_thr = thread::spawn(move || loop {
-        thread::sleep(Duration::from_millis(100));
 
-        let reason = watcher_tasks_status.load(Ordering::SeqCst);
-        match reason {
-            TASKS_WAITING => continue,
-            TASKS_SUCCESS => {}
-            TASKS_FAILURE => watcher_reap(),
+    // watcher: periodically check tasks's execution status
+    let watcher_tasks_status = Arc::clone(&tasks_status);
+    let watcher_retval = Arc::clone(&retval);
+    let watcher_thr = thread::spawn(move || loop {
+        thread::sleep(Duration::from_millis(167));
+
+        // terminated by user
+        if let Some(errmsg) = watched() {
+            retval_init(&watcher_retval, &errmsg);
+            watcher_reap();
+            break;
+        }
+
+        // terminated by taskmgr
+        let status = watcher_tasks_status.load(Ordering::SeqCst);
+        match status {
+            TASKS_WAITING => {
+                continue;
+            }
+            TASKS_SUCCESS => {
+                break;
+            }
+            TASKS_FAILURE => {
+                watcher_reap();
+                break;
+            }
             _ => unreachable!(),
         }
-        break;
     });
 
     // children: wait for all tasks to be done
@@ -175,7 +195,7 @@ pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
         .into_iter()
         .for_each(move |thr| thr.join().expect("failed to join on the associated thread"));
 
-    // watcher:
+    // watcher: stop itself
     tasks_status_init(&tasks_status, TASKS_SUCCESS);
     watcher_thr
         .join()

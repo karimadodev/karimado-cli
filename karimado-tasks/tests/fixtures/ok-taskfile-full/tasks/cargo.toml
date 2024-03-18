@@ -1,0 +1,29 @@
+[[includes]]
+name = "run"
+taskfile = "cargo/run.toml"
+working_dir = "path-relative-to-cwd"
+
+[[tasks]]
+name = "new"
+command = "cargo new"
+description = "Create a new cargo package"
+
+[[tasks]]
+name = "install"
+command = "cargo install"
+description = "Install a Rust binary"
+
+[[tasks]]
+name = "run"
+command = "cargo run"
+description = "Run a binary or example of the local package"
+
+[[tasks]]
+name = "fmt"
+command = "cargo fmt -- {{CLI_ARGS}}"
+description = "Formats all bin and lib files of the current crate using rustfmt"
+
+[[tasks]]
+name = "build"
+command = "cargo build"
+description = "Compile the current package"

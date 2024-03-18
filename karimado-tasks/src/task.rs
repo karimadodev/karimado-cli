@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub(crate) struct Task {
     pub(crate) name: String,
     pub(crate) command: String,

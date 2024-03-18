@@ -1,0 +1,12 @@
+[[includes]]
+name = "cargo"
+taskfile = "tasks/cargo.toml"
+
+[[includes]]
+name = "ruby"
+taskfile = "tasks/ruby.toml"
+
+[[includes]]
+name = "nonexists"
+taskfile = "tasks/nonexists.toml"
+optional = true

@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "build_test.rs"]
+mod tests;
+
 use handlebars::Handlebars;
 use serde_json::json;
 use std::path::{Path, PathBuf};
@@ -38,7 +42,9 @@ pub(crate) fn build(current_dir: &Path, taskfile: &str, cli_args: &[String]) -> 
         .to_path_buf();
     build_taskfile(&taskfile, &mut ctx)?;
 
-    Ok(ctx.tasks)
+    let mut tasks = ctx.tasks;
+    tasks.sort_by_key(|task| task.name.clone());
+    Ok(tasks)
 }
 
 fn build_taskfile(taskfile: &taskfile::Taskfile, ctx: &mut BuildingContext) -> Result<()> {

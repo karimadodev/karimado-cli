@@ -1,5 +1,3 @@
-use std::time::{Duration, Instant};
-
 use super::*;
 use crate::build_task;
 
@@ -10,12 +8,12 @@ fn ok() {
         build_task!(command: "ruby -e 'sleep(1)'"),
     ];
 
-    let now = Instant::now();
+    let now = std::time::Instant::now();
     let r = execute(&tasks, false);
     let elapsed = now.elapsed();
 
     assert!(r.is_ok());
-    assert!(elapsed < Duration::from_secs(2));
+    assert!(elapsed < std::time::Duration::from_secs(2));
 }
 
 #[test]

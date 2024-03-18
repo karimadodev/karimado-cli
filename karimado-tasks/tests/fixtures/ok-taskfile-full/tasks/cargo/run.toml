@@ -1,0 +1,19 @@
+[[tasks]]
+name = "new"
+command = "cargo run new"
+description = "Create a new Karimado application at the path you specify"
+
+[[tasks]]
+name = "run"
+command = "cargo run run"
+description = "Run a defined task"
+
+[[tasks]]
+name = "build"
+command = "cargo run build"
+description = "Parse and transform Karimado Modeling Language files"
+
+[[tasks]]
+name = "scaffold:install"
+command = "cargo run scaffold:install"
+description = "Install scaffolding files in a specific location"

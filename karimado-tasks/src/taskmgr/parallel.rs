@@ -8,17 +8,21 @@ use shared_child::SharedChild;
 use std::{
     io::{BufRead, BufReader},
     process::Stdio,
-    sync::{mpsc, Arc, Mutex},
+    sync::{
+        atomic::{AtomicI32, Ordering},
+        Arc, Mutex,
+    },
     thread,
+    time::Duration,
 };
 
 use crate::{error::*, shell, Task};
 
-const TASKS_SUCCESS: i32 = 0; // all tasks succeed
-const TASKS_FAILURE: i32 = 1; // one of the tasks had failed
-const TASKS_CTRL_C_: i32 = 2; // received Ctrl-C signal
+const TASKS_WAITING: i32 = 0; // waiting to be done
+const TASKS_SUCCESS: i32 = 1; // done: all tasks succeed
+const TASKS_FAILURE: i32 = 2; // done: one of the tasks had failed
 
-pub(crate) fn execute(tasks: &[Task], ctrlc: bool) -> Result<()> {
+pub(crate) fn execute(tasks: &[Task]) -> Result<()> {
     let colored_task_name = |name: &str| format!(" {} |", name).purple();
     let maxwidth = tasks
         .iter()
@@ -30,10 +34,16 @@ pub(crate) fn execute(tasks: &[Task], ctrlc: bool) -> Result<()> {
     let mut stderr_thrs: Vec<thread::JoinHandle<()>> = vec![];
     let mut waiter_thrs: Vec<thread::JoinHandle<()>> = vec![];
 
-    let (tx, rx) = mpsc::channel::<i32>();
-    let children: HashMap<usize, (String, Arc<SharedChild>)> = HashMap::with_capacity(tasks.len());
+    // tasks_status: the value used to store tasks's execution status
+    let tasks_status = Arc::new(AtomicI32::new(TASKS_WAITING));
+    let tasks_status_init = |tasks_status: &Arc<AtomicI32>, val: i32| {
+        if TASKS_WAITING == tasks_status.load(Ordering::SeqCst) {
+            tasks_status.store(val, Ordering::SeqCst);
+        }
+    };
 
     // children: spawn all tasks
+    let children: HashMap<usize, (String, Arc<SharedChild>)> = HashMap::with_capacity(tasks.len());
     for (task_id, task) in tasks.iter().enumerate() {
         let task_name = colored_task_name(&task.name);
         let line = format!("$ {}", task.command).green();
@@ -77,9 +87,9 @@ pub(crate) fn execute(tasks: &[Task], ctrlc: bool) -> Result<()> {
         }));
 
         // child: waiter
-        let waiter_tx = tx.clone();
-        let waiter_child = child.clone();
         let waiter_task_name = task_name.clone();
+        let waiter_child = Arc::clone(&child);
+        let waiter_tasks_status = Arc::clone(&tasks_status);
         waiter_thrs.push(thread::spawn(move || {
             let status = waiter_child.wait().expect("command wasn't running");
             let code = status.code();
@@ -91,12 +101,12 @@ pub(crate) fn execute(tasks: &[Task], ctrlc: bool) -> Result<()> {
                 Some(c) => {
                     let line = format!("task exited with code {}", c);
                     log::info!("{:>w$} {}", waiter_task_name, line.red(), w = maxwidth);
-                    _ = waiter_tx.send(TASKS_FAILURE)
+                    tasks_status_init(&waiter_tasks_status, TASKS_FAILURE);
                 }
                 None => {
                     let line = "task terminated".to_string();
                     log::info!("{:>w$} {}", waiter_task_name, line.yellow(), w = maxwidth);
-                    _ = waiter_tx.send(TASKS_FAILURE)
+                    tasks_status_init(&waiter_tasks_status, TASKS_FAILURE);
                 }
             }
         }));
@@ -105,7 +115,7 @@ pub(crate) fn execute(tasks: &[Task], ctrlc: bool) -> Result<()> {
         children.pin().insert(task_id, (task.name.clone(), child));
     }
 
-    // retval: the value used to store execution result
+    // retval: the value used to store tasks's execution failure reason
     let retval = Arc::new(Mutex::new(String::new()));
     let retval_init = |retval: &Arc<Mutex<String>>, errmsg: &str| {
         let mut retval = retval.lock().expect("failed to lock data");
@@ -114,14 +124,10 @@ pub(crate) fn execute(tasks: &[Task], ctrlc: bool) -> Result<()> {
         };
     };
 
-    // watcher: collect execution result into retval
+    // watcher: periodically check tasks's execution status
+    let watcher_tasks_status = Arc::clone(&tasks_status);
     let watcher_retval = Arc::clone(&retval);
-    let watcher_reap = move |reason| {
-        if reason == TASKS_CTRL_C_ {
-            let err = "received Ctrl-C signal";
-            retval_init(&watcher_retval, err);
-        }
-
+    let watcher_reap = move || {
         for (_task_id, (task_name, child)) in &children.pin() {
             // unfinished tasks: force kill
             let status = child.try_wait().expect("failed to try wait");
@@ -145,22 +151,18 @@ pub(crate) fn execute(tasks: &[Task], ctrlc: bool) -> Result<()> {
             }
         }
     };
-    let watcher_thr = thread::spawn(move || {
-        let reason = rx.recv().expect("failed to recv"); // peek the first value
+    let watcher_thr = thread::spawn(move || loop {
+        thread::sleep(Duration::from_millis(100));
+
+        let reason = watcher_tasks_status.load(Ordering::SeqCst);
         match reason {
+            TASKS_WAITING => continue,
             TASKS_SUCCESS => {}
-            TASKS_FAILURE => watcher_reap(reason),
-            TASKS_CTRL_C_ => watcher_reap(reason),
+            TASKS_FAILURE => watcher_reap(),
             _ => unreachable!(),
         }
+        break;
     });
-
-    // ctrlc:
-    if ctrlc {
-        let ctrlc_tx = tx.clone();
-        ctrlc::set_handler(move || _ = ctrlc_tx.send(TASKS_CTRL_C_))
-            .expect("failed to set Ctrl-C handler");
-    }
 
     // children: wait for all tasks to be done
     stdout_thrs
@@ -174,7 +176,7 @@ pub(crate) fn execute(tasks: &[Task], ctrlc: bool) -> Result<()> {
         .for_each(move |thr| thr.join().expect("failed to join on the associated thread"));
 
     // watcher:
-    _ = tx.send(TASKS_SUCCESS);
+    tasks_status_init(&tasks_status, TASKS_SUCCESS);
     watcher_thr
         .join()
         .expect("failed to join on the associated thread");

@@ -9,7 +9,7 @@ fn ok() {
     ];
 
     let now = std::time::Instant::now();
-    let r = execute(&tasks, false);
+    let r = execute(&tasks);
     let elapsed = now.elapsed();
 
     assert!(r.is_ok());
@@ -23,7 +23,7 @@ fn err_command_not_found() {
         build_task!(command: "ruby -e 'sleep(1)'"),
     ];
 
-    let r = execute(&tasks, false);
+    let r = execute(&tasks);
     assert!(r.is_err());
     assert!(matches!(r, Err(Error::TaskRunFailed(_))));
 
@@ -39,7 +39,7 @@ fn err_exit_code_is_nonzero() {
         build_task!(command: "ruby -e 'sleep(1)'"),
     ];
 
-    let r = execute(&tasks, false);
+    let r = execute(&tasks);
     assert!(r.is_err());
     assert!(matches!(r, Err(Error::TaskRunFailed(_))));
 

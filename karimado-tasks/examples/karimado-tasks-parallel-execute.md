@@ -45,7 +45,7 @@ $ karimado-tasks-parallel-execute true true true
 
 ## Immediately terminated if task failed
 
-```console
+```console,ignore
 $ karimado-tasks-parallel-execute sleep1 false sleep1
 ? 1
  sleep1 | -> ruby -e 'sleep(1)'

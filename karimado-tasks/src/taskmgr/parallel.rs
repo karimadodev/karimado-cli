@@ -45,7 +45,7 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
     let children: HashMap<usize, (String, Arc<SharedChild>)> = HashMap::with_capacity(tasks.len());
     for (task_id, task) in tasks.iter().enumerate() {
         let task_name = colored_task_name(&task.name);
-        let line = format!("$ {}", task.command).green();
+        let line = format!("-> {}", task.command).green();
         log::info!("{:>w$} {}", task_name, line, w = maxwidth);
 
         // child: spawn

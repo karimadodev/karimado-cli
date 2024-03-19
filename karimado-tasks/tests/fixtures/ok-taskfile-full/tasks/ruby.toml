@@ -1,9 +1,7 @@
 [[tasks]]
 name = "true"
 command = "ruby -e 'exit(0)'"
-description = "Do nothing, successfully"
 
 [[tasks]]
 name = "false"
 command = "ruby -e 'exit(1)'"
-description = "Do nothing, unsuccessfully"

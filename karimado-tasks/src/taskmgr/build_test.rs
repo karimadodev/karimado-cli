@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn ok_taskfile_full() {
     let current_dir = std::env::current_dir().unwrap();
-    let taskfile = "tests/fixtures/ok-taskfile-full/tasks.toml";
+    let taskfile = "tests/fixtures/taskmgr/build/ok-taskfile-full/tasks.toml";
     let cli_args = vec![String::from("--check"), String::from("-v")];
 
     let r = build(&current_dir, taskfile, &cli_args);
@@ -59,7 +59,7 @@ fn ok_taskfile_full() {
 #[test]
 fn err_taskfile_include_nonexists() {
     let current_dir = std::env::current_dir().unwrap();
-    let taskfile = "tests/fixtures/err-taskfile-include-nonexists/tasks.toml";
+    let taskfile = "tests/fixtures/taskmgr/build/err-taskfile-include-nonexists/tasks.toml";
     let cli_args = vec![];
 
     let r = build(&current_dir, taskfile, &cli_args);

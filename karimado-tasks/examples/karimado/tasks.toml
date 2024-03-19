@@ -1,3 +1,15 @@
 [[includes]]
-name = "ruby"
-taskfile = "tasks/ruby.toml"
+name = "cargo"
+taskfile = "tasks/cargo.toml"
+
+[[tasks]]
+name = "true"
+command = "ruby -e 'exit(0)'"
+
+[[tasks]]
+name = "false"
+command = "ruby -e 'exit(1)'"
+
+[[tasks]]
+name = "sleep1"
+command = "ruby -e 'sleep(1)'"

@@ -1,7 +1,0 @@
-[[tasks]]
-name = "true"
-command = "ruby -e 'exit(0)'"
-
-[[tasks]]
-name = "false"
-command = "ruby -e 'exit(1)'"

@@ -1,0 +1,24 @@
+[[tasks]]
+name = "new"
+command = "cargo new"
+description = "Create a new cargo package"
+
+[[tasks]]
+name = "install"
+command = "cargo install"
+description = "Install a Rust binary"
+
+[[tasks]]
+name = "run"
+command = "cargo run"
+description = "Run a binary or example of the local package"
+
+[[tasks]]
+name = "fmt"
+command = "cargo fmt -- {{CLI_ARGS}}"
+description = "Formats all files"
+
+[[tasks]]
+name = "build"
+command = "cargo build"
+description = "Compile the current package"

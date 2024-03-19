@@ -21,21 +21,19 @@ fn main() -> Result<(), karimado_tasks::Error> {
 }
 ```
 
-
 ## Invoke one task
 
 ```console
-$ karimado-tasks-execute ruby:true
+$ karimado-tasks-execute true
 -> ruby -e 'exit(0)'
 
 
 ```
-
 
 ## Invoke multiple tasks
 
 ```console
-$ karimado-tasks-execute ruby:true ruby:true ruby:true
+$ karimado-tasks-execute true true true
 -> ruby -e 'exit(0)'
 
 -> ruby -e 'exit(0)'
@@ -45,16 +43,15 @@ $ karimado-tasks-execute ruby:true ruby:true ruby:true
 
 ```
 
-
 ## Immediately terminated if task failed
 
 ```console
-$ karimado-tasks-execute ruby:true ruby:false ruby:true
+$ karimado-tasks-execute sleep1 false sleep1
 ? 1
--> ruby -e 'exit(0)'
+-> ruby -e 'sleep(1)'
 
 -> ruby -e 'exit(1)'
 
-Error: TaskRunFailed("failed to run task `ruby:false`, exited with code 1")
+Error: TaskRunFailed("failed to run task `false`, exited with code 1")
 
 ```

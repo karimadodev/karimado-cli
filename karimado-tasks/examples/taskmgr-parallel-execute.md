@@ -28,15 +28,15 @@ $ taskmgr-parallel-execute true true true
 
 ## Immediately terminated if task failed
 
-```console,ignore
+```console
 $ taskmgr-parallel-execute sleep1 false sleep1
 ? 1
  sleep1 | -> ruby -e 'sleep(1)'
   false | -> ruby -e 'exit(1)'
  sleep1 | -> ruby -e 'sleep(1)'
   false | task exited with code 1
- sleep1 | task terminated
- sleep1 | task terminated
+ sleep1 | task [..]
+ sleep1 | task [..]
 Error: TaskRunFailed("failed to run task `false`, exited with code 1")
 
 ```

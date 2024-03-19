@@ -8,7 +8,7 @@ Run a defined task:
 
 ```console
 $ taskmgr --help
-Usage: taskmgr [OPTIONS] [TASK]... [-- <ARGS>...]
+Usage: taskmgr[EXE] [OPTIONS] [TASK]... [-- <ARGS>...]
 
 Arguments:
   [TASK]...  Task Name [default: default]

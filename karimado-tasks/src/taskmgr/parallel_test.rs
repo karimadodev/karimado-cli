@@ -1,3 +1,8 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::thread;
+use std::time::{Duration, Instant};
+
 use super::*;
 use crate::build_task;
 
@@ -8,7 +13,7 @@ fn ok() {
         build_task!(command: "ruby -e 'sleep(1)'"),
     ];
 
-    let now = std::time::Instant::now();
+    let now = Instant::now();
     let r = execute(&tasks, || None);
     let elapsed = now.elapsed();
 
@@ -55,10 +60,10 @@ fn err_timeout() {
         build_task!(command: "ruby -e 'sleep(1)'"),
     ];
 
-    let terminated = Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let terminated = Arc::new(AtomicBool::new(false));
     let timeout_terminated = Arc::clone(&terminated);
     thread::spawn(move || {
-        thread::sleep(std::time::Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(500));
         timeout_terminated.store(true, Ordering::SeqCst);
     });
 

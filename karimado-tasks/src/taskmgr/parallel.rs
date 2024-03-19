@@ -5,16 +5,12 @@ mod tests;
 use colored::Colorize;
 use flurry::HashMap;
 use shared_child::SharedChild;
-use std::{
-    io::{BufRead, BufReader},
-    process::Stdio,
-    sync::{
-        atomic::{AtomicI32, Ordering},
-        Arc, Mutex,
-    },
-    thread,
-    time::Duration,
-};
+use std::io::{BufRead, BufReader};
+use std::process::Stdio;
+use std::sync::atomic::{AtomicI32, Ordering};
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 
 use crate::{error::*, shell, Task};
 

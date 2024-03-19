@@ -2,9 +2,10 @@ mod include;
 mod task;
 
 use serde::Deserialize;
-use std::{fs, path::Path};
+use std::fs;
+use std::path::Path;
 
-use crate::{error::*, Result};
+use crate::error::*;
 
 pub(crate) use include::*;
 pub(crate) use task::*;

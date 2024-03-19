@@ -62,9 +62,13 @@ impl TaskMgr {
         parallel::execute(&tasks, watched)
     }
 
-    pub fn execute(&self, task_names: &[String]) -> Result<()> {
+    pub fn execute<F: Fn() -> Option<String> + Send + 'static>(
+        &self,
+        task_names: &[String],
+        watched: F,
+    ) -> Result<()> {
         let tasks = self.lookup_tasks(task_names)?;
-        execute::execute(&tasks)
+        execute::execute(&tasks, watched)
     }
 
     fn lookup_tasks(&self, task_names: &[String]) -> Result<Vec<Task>> {

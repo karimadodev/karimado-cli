@@ -45,21 +45,22 @@ impl RunCommand {
             return Ok(());
         }
 
-        let result = if self.parallel {
-            let terminated = Arc::new(AtomicBool::new(false));
-            let ctrlc_terminated = Arc::clone(&terminated);
-            ctrlc::set_handler(move || ctrlc_terminated.store(true, Ordering::SeqCst))
-                .expect("failed to set Ctrl-C handler");
+        let terminated = Arc::new(AtomicBool::new(false));
+        let watched_terminated = Arc::clone(&terminated);
+        let watched_terminated_value = move || {
+            if watched_terminated.load(Ordering::SeqCst) {
+                Some("received Ctrl-C signal".to_string())
+            } else {
+                None
+            }
+        };
+        ctrlc::set_handler(move || terminated.store(true, Ordering::SeqCst))
+            .expect("failed to set Ctrl-C handler");
 
-            taskmgr.parallel_execute(&self.task, move || {
-                if terminated.load(Ordering::SeqCst) {
-                    Some("received Ctrl-C signal".to_string())
-                } else {
-                    None
-                }
-            })
+        let result = if self.parallel {
+            taskmgr.parallel_execute(&self.task, watched_terminated_value)
         } else {
-            taskmgr.execute(&self.task)
+            taskmgr.execute(&self.task, watched_terminated_value)
         };
 
         if let Err(err) = result {

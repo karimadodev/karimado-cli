@@ -24,7 +24,7 @@ fn main() -> Result<(), karimado_tasks::Error> {
 ## Invoke one task
 
 ```console
-$ karimado-tasks-parallel-execute true
+$ taskmgr-parallel-execute true
  true | -> ruby -e 'exit(0)'
  true | task finished
 
@@ -33,7 +33,7 @@ $ karimado-tasks-parallel-execute true
 ## Invoke multiple tasks
 
 ```console
-$ karimado-tasks-parallel-execute true true true
+$ taskmgr-parallel-execute true true true
  true | -> ruby -e 'exit(0)'
  true | -> ruby -e 'exit(0)'
  true | -> ruby -e 'exit(0)'
@@ -46,7 +46,7 @@ $ karimado-tasks-parallel-execute true true true
 ## Immediately terminated if task failed
 
 ```console,ignore
-$ karimado-tasks-parallel-execute sleep1 false sleep1
+$ taskmgr-parallel-execute sleep1 false sleep1
 ? 1
  sleep1 | -> ruby -e 'sleep(1)'
   false | -> ruby -e 'exit(1)'

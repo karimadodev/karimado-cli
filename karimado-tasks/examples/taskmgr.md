@@ -1,14 +1,14 @@
-# taskmgr-with-clap
+# taskmgr
 
 Run a defined task:
 
-[karimado-tasks-with-clap.rs](./karimado-tasks-with-clap.rs)
+[taskmgr.rs](./taskmgr.rs)
 
 ## --help
 
 ```console
-$ karimado-tasks --help
-Usage: karimado-tasks [OPTIONS] [TASK]... [-- <ARGS>...]
+$ taskmgr --help
+Usage: taskmgr [OPTIONS] [TASK]... [-- <ARGS>...]
 
 Arguments:
   [TASK]...  Task Name [default: default]
@@ -25,7 +25,7 @@ Options:
 ## --list
 
 ```console
-$ karimado-tasks --list
+$ taskmgr --list
 Available tasks for this project:
 * cargo:build   # Compile the current package
 * cargo:fmt     # Formats all files
@@ -42,7 +42,7 @@ Available tasks for this project:
 ## --parallel
 
 ```console
-$ karimado-tasks -p sleepn true sleepn -- 2
+$ taskmgr -p sleepn true sleepn -- 2
  sleepn | -> ruby -e 'sleep(2)'
    true | -> ruby -e 'exit(0)'
  sleepn | -> ruby -e 'sleep(2)'

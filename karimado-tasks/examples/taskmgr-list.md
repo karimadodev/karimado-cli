@@ -23,7 +23,7 @@ fn main() {
 ## List tasks
 
 ```console
-$ karimado-tasks-list
+$ taskmgr-list
 Available tasks for this project:
 * cargo:build   # Compile the current package
 * cargo:fmt     # Formats all files

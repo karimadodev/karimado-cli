@@ -32,6 +32,7 @@ Available tasks for this project:
 * cargo:run     # Run a binary or example of the local package
 * false         # ruby -e 'exit(1)'
 * sleep1        # ruby -e 'sleep(1)'
+* sleepn        # ruby -e 'sleep(n)'
 * true          # ruby -e 'exit(0)'
 
 ```

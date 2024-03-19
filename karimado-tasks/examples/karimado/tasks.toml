@@ -13,3 +13,8 @@ command = "ruby -e 'exit(1)'"
 [[tasks]]
 name = "sleep1"
 command = "ruby -e 'sleep(1)'"
+
+[[tasks]]
+name = "sleepn"
+command = "ruby -e 'sleep({{CLI_ARGS}})'"
+description = "ruby -e 'sleep(n)'"

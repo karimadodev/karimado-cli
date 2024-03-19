@@ -18,7 +18,9 @@ thiserror = "1.0.58"
 toml = "0.8.10"
 
 [dev-dependencies]
+clap = { version = "4.5.3", features = ["derive"] }
 ctor = "0.2.7"
+ctrlc = { version = "3.4.4", features = ["termination"] }
 env_logger = "0.11.2"
 trycmd = { version = "0.15.0", features = ["examples"] }
 
@@ -33,3 +35,7 @@ path = "examples/karimado-tasks-execute.rs"
 [[example]]
 name = "karimado-tasks-parallel-execute"
 path = "examples/karimado-tasks-parallel-execute.rs"
+
+[[example]]
+name = "karimado-tasks"
+path = "examples/karimado-tasks-with-clap.rs"

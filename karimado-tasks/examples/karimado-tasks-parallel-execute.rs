@@ -12,5 +12,5 @@ fn main() -> Result<(), karimado_tasks::Error> {
         .taskfile("examples/karimado/tasks.toml")
         .build()
         .unwrap();
-    taskmgr.execute(&args[1..], || None)
+    taskmgr.parallel_execute(&args[1..], || None)
 }

@@ -3,8 +3,6 @@
 Executes tasks provided on command line:
 
 ```rust
-use karimado_tasks;
-
 fn main() -> Result<(), karimado_tasks::Error> {
     env_logger::builder()
         .format_level(false)

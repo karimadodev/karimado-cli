@@ -23,9 +23,13 @@ env_logger = "0.11.2"
 trycmd = { version = "0.15.0", features = ["examples"] }
 
 [[example]]
+name = "karimado-tasks-list"
+path = "examples/karimado-tasks-list.rs"
+
+[[example]]
 name = "karimado-tasks-execute"
 path = "examples/karimado-tasks-execute.rs"
 
 [[example]]
-name = "karimado-tasks-list"
-path = "examples/karimado-tasks-list.rs"
+name = "karimado-tasks-parallel-execute"
+path = "examples/karimado-tasks-parallel-execute.rs"

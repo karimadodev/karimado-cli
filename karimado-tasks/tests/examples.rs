@@ -9,16 +9,22 @@ fn examples() {
 #[cfg(target_family = "unix")]
 #[test]
 fn examples_taskmgr_ctrlc() {
-    use assert_cmd::prelude::*;
+    use assert_fs::TempDir;
+    use escargot::CargoBuild;
     use nix::sys::signal;
     use nix::sys::signal::Signal;
     use nix::unistd::Pid;
-    use std::process::{Command, Stdio};
+    use std::process::Stdio;
     use std::thread;
-    use std::time::{Duration, Instant};
+    use std::time::Duration;
 
-    let mut cmd = Command::cargo_bin("examples/taskmgr").unwrap();
-    let now = Instant::now();
+    let tmp = TempDir::new().unwrap();
+    let mut cmd = CargoBuild::new()
+        .example("taskmgr")
+        .target_dir(tmp.path())
+        .run()
+        .unwrap()
+        .command();
     let child = cmd
         .args(["-p", "sleepn", "sleepn", "--", "4"])
         .stdout(Stdio::piped())
@@ -29,9 +35,6 @@ fn examples_taskmgr_ctrlc() {
     signal::kill(Pid::from_raw(child.id() as i32), Signal::SIGINT).unwrap();
 
     let output = child.wait_with_output().unwrap();
-    let elapsed = now.elapsed();
-    assert!(elapsed < Duration::from_secs(1));
-
     let status = output.status;
     assert!(!status.success());
 

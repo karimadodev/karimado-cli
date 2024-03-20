@@ -1,6 +1,7 @@
 [[includes]]
 name = "cargo"
 taskfile = "tasks/cargo.toml"
+working_dir = "dir-a1/dir-b1"
 
 [[includes]]
 name = "ruby"

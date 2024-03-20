@@ -88,7 +88,11 @@ fn build_taskfile_include(include: &taskfile::Include, ctx: &mut BuildingContext
         v.push(include.name.clone());
         v
     };
-    let new_tasks_cwd = ctx.working_dir.join(&include.working_dir);
+    let new_tasks_cwd = if let Some(wd) = &include.working_dir {
+        ctx.working_dir.join(wd)
+    } else {
+        ctx.tasks_cwd.clone()
+    };
     let new_taskfile_dir = taskfile_path
         .parent()
         .expect("failed to resolve taskfile dir")
@@ -118,9 +122,9 @@ fn build_taskfile_task(task: &taskfile::Task, ctx: &mut BuildingContext) -> Resu
         v.push(task.name.clone());
         v.join(":")
     };
-    let command = build_taskfile_task_command(&task.command, ctx)?;
+    let command = build_taskfile_task_command(task, ctx)?;
     let description = task.description.clone();
-    let current_dir = ctx.tasks_cwd.clone();
+    let current_dir = build_taskfile_task_current_dir(task, ctx)?;
 
     ctx.tasks.push(Task {
         name,
@@ -132,13 +136,25 @@ fn build_taskfile_task(task: &taskfile::Task, ctx: &mut BuildingContext) -> Resu
     Ok(())
 }
 
-fn build_taskfile_task_command(command: &str, ctx: &mut BuildingContext) -> Result<String> {
+fn build_taskfile_task_command(task: &taskfile::Task, ctx: &mut BuildingContext) -> Result<String> {
     let renderer = Handlebars::new();
     let vars = &json!({
         "CLI_ARGS": ctx.cli_args
     });
     let command = renderer
-        .render_template(command, &vars)
+        .render_template(&task.command, &vars)
         .map_err(TaskFileParseFailedKind::ParseTaskCommandFailed)?;
     Ok(command)
+}
+
+fn build_taskfile_task_current_dir(
+    task: &taskfile::Task,
+    ctx: &mut BuildingContext,
+) -> Result<PathBuf> {
+    let cwd = if let Some(wd) = &task.working_dir {
+        ctx.working_dir.join(wd)
+    } else {
+        ctx.tasks_cwd.clone()
+    };
+    Ok(cwd)
 }

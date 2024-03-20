@@ -1,7 +1,7 @@
 [[includes]]
 name = "run"
 taskfile = "cargo/run.toml"
-working_dir = "path-relative-to-cwd"
+working_dir = "dir-a2"
 
 [[tasks]]
 name = "new"

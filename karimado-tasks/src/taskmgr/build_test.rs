@@ -1,16 +1,19 @@
 use super::*;
 
-#[test]
-fn ok_taskfile_full() {
+fn load_tasks_from(taskfile: &str, cli_args: &[String]) -> Result<Vec<Task>> {
     let current_dir = std::env::current_dir().unwrap();
+    build(&current_dir, taskfile, &cli_args)
+}
+
+fn load_tasks_from_ok_taskfile() -> Vec<Task> {
     let taskfile = "tests/fixtures/taskmgr/build/ok-taskfile-full/tasks.toml";
     let cli_args = vec![String::from("--check"), String::from("-v")];
+    load_tasks_from(taskfile, &cli_args).unwrap()
+}
 
-    let r = build(&current_dir, taskfile, &cli_args);
-    assert!(r.is_ok());
-
-    // tasks's order
-    let tasks = r.unwrap();
+#[test]
+fn ok_taskfile_name() {
+    let tasks = load_tasks_from_ok_taskfile();
     assert_eq!(
         tasks
             .iter()
@@ -30,39 +33,74 @@ fn ok_taskfile_full() {
             "ruby:true",
         ],
     );
+}
 
-    // task's name, command, description
+#[test]
+fn ok_taskfile_command() {
+    let tasks = load_tasks_from_ok_taskfile();
     let task = tasks.iter().find(|t| t.name == "cargo:install").unwrap();
     assert_eq!(task.command, "cargo install");
-    assert_eq!(task.description, Some("Install a Rust binary".to_string()));
-    assert_eq!(task.current_dir, current_dir);
+}
 
-    // task's name, command, description
-    let task = tasks.iter().find(|t| t.name == "ruby:true").unwrap();
-    assert_eq!(task.command, "ruby -e 'exit(0)'");
-    assert_eq!(task.description, None);
-    assert_eq!(task.current_dir, current_dir);
-
-    // taskfile::Include#working_dir
-    let task = tasks.iter().find(|t| t.name == "cargo:run:run").unwrap();
-    assert_eq!(task.command, "cargo run run");
-    assert_eq!(task.description, Some("Run a defined task".to_string()));
-    assert_eq!(task.current_dir, current_dir.join("path-relative-to-cwd"));
-
-    // taskfile::Task#command builtin vars
+#[test]
+fn ok_taskfile_command_vars_cli_args() {
+    let tasks = load_tasks_from_ok_taskfile();
     let task = tasks.iter().find(|t| t.name == "cargo:fmt").unwrap();
     assert_eq!(task.command, "cargo fmt -- --check -v");
-    assert_eq!(task.description, Some("Formats all files".to_string()));
-    assert_eq!(task.current_dir, current_dir);
+}
+
+#[test]
+fn ok_tasks_description() {
+    let tasks = load_tasks_from_ok_taskfile();
+    let task = tasks.iter().find(|t| t.name == "cargo:install").unwrap();
+    assert_eq!(task.description, Some("Install a Rust binary".to_string()));
+}
+
+#[test]
+fn ok_tasks_description_none() {
+    let tasks = load_tasks_from_ok_taskfile();
+    let task = tasks.iter().find(|t| t.name == "ruby:true").unwrap();
+    assert_eq!(task.description, None);
+}
+
+#[test]
+fn ok_tasks_current_dir() {
+    let tasks = load_tasks_from_ok_taskfile();
+    let task = tasks.iter().find(|t| t.name == "ruby:true").unwrap();
+    assert_eq!(task.current_dir, std::env::current_dir().unwrap());
+}
+
+#[test]
+fn ok_tasks_current_dir_includes_working_dir() {
+    let tasks = load_tasks_from_ok_taskfile();
+    let task = tasks.iter().find(|t| t.name == "cargo:install").unwrap();
+    let actual = task.current_dir.clone();
+    let expected = std::env::current_dir().unwrap().join("dir-a1/dir-b1");
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ok_tasks_current_dir_includes_working_dir_nested() {
+    let tasks = load_tasks_from_ok_taskfile();
+    let task = tasks.iter().find(|t| t.name == "cargo:run:new").unwrap();
+    let actual = task.current_dir.clone();
+    let expected = std::env::current_dir().unwrap().join("dir-a2");
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ok_tasks_current_dir_command_working_dir() {
+    let tasks = load_tasks_from_ok_taskfile();
+    let task = tasks.iter().find(|t| t.name == "cargo:run:build").unwrap();
+    let actual = task.current_dir.clone();
+    let expected = std::env::current_dir().unwrap().join("dir-a3/dir-b1");
+    assert_eq!(actual, expected);
 }
 
 #[test]
 fn err_taskfile_include_nonexists() {
-    let current_dir = std::env::current_dir().unwrap();
     let taskfile = "tests/fixtures/taskmgr/build/err-taskfile-include-nonexists/tasks.toml";
-    let cli_args = vec![];
-
-    let r = build(&current_dir, taskfile, &cli_args);
+    let r = load_tasks_from(taskfile, &vec![]);
     assert!(r.is_err());
     assert!(matches!(r, Err(Error::TaskFileParseFailed(_))));
 

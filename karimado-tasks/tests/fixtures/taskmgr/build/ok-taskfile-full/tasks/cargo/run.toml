@@ -12,6 +12,7 @@ description = "Run a defined task"
 name = "build"
 command = "cargo run build"
 description = "Parse and transform Karimado Modeling Language files"
+working_dir = "dir-a3/dir-b1"
 
 [[tasks]]
 name = "scaffold:install"

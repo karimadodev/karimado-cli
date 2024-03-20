@@ -7,4 +7,6 @@ pub(crate) struct Task {
     pub(crate) command: String,
     #[serde(default)]
     pub(crate) description: Option<String>,
+    #[serde(default)]
+    pub(crate) working_dir: Option<String>,
 }

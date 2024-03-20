@@ -9,7 +9,6 @@ fn examples() {
 #[cfg(target_family = "unix")]
 #[test]
 fn examples_taskmgr_ctrlc() {
-    use assert_fs::TempDir;
     use escargot::CargoBuild;
     use nix::sys::signal;
     use nix::sys::signal::Signal;
@@ -18,10 +17,8 @@ fn examples_taskmgr_ctrlc() {
     use std::thread;
     use std::time::Duration;
 
-    let tmp = TempDir::new().unwrap();
     let mut cmd = CargoBuild::new()
         .example("taskmgr")
-        .target_dir(tmp.path())
         .run()
         .unwrap()
         .command();

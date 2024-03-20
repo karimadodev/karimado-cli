@@ -18,7 +18,6 @@ thiserror = "1.0.58"
 toml = "0.8.10"
 
 [dev-dependencies]
-assert_fs = "1.1.1"
 clap = { version = "4.5.3", features = ["derive"] }
 ctor = "0.2.7"
 ctrlc = { version = "3.4.4", features = ["termination"] }

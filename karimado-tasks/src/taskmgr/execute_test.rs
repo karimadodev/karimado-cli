@@ -54,7 +54,7 @@ fn err_exit_code_is_nonzero() {
 }
 
 #[test]
-fn err_timeout() {
+fn err_watched_timeout() {
     let tasks: Vec<Task> = vec![
         build_task!(command: "ruby -e 'sleep(1)'"),
         build_task!(command: "ruby -e 'sleep(1)'"),

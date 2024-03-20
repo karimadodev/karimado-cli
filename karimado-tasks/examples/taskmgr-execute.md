@@ -1,6 +1,6 @@
 # taskmgr#execute
 
-Executes tasks provided on command line:
+Executes tasks provided on command line
 
 [taskmgr-execute.rs](./taskmgr-execute.rs)
 

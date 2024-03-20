@@ -1,6 +1,6 @@
 # taskmgr
 
-Run a defined task:
+Run a defined task
 
 [taskmgr.rs](./taskmgr.rs)
 

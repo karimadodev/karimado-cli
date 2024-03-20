@@ -1,6 +1,6 @@
 # taskmgr#parallel_execute
 
-Executes tasks provided on command line in parallel:
+Executes tasks provided on command line in parallel
 
 [taskmgr-parallel-execute.rs](./taskmgr-parallel-execute.rs)
 

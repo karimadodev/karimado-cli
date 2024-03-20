@@ -1,6 +1,6 @@
 # taskmgr#list
 
-Lists tasks with description of current taskfile:
+Lists tasks with description of current taskfile
 
 [taskmgr-list.rs](./taskmgr-list.rs)
 

@@ -952,6 +952,7 @@ dependencies = [
  "git2",
  "globset",
  "infer",
+ "karimado-source-dl",
  "karimado-tasks",
  "log",
  "path-absolutize",
@@ -963,6 +964,16 @@ dependencies = [
  "url",
  "walkdir",
  "zip",
+]
+
+[[package]]
+name = "karimado-source-dl"
+version = "0.0.0"
+dependencies = [
+ "ctor",
+ "env_logger",
+ "log",
+ "thiserror",
 ]
 
 [[package]]

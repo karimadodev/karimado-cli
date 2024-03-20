@@ -28,6 +28,10 @@ url = { version = "2.5.0", features = ["serde"] }
 walkdir = "2.5.0"
 zip = "0.6.6"
 
+[dependencies.karimado-source-dl]
+version = "0.0.0"
+path = "../karimado-source-dl"
+
 [dependencies.karimado-tasks]
 version = "0.0.0"
 path = "../karimado-tasks"

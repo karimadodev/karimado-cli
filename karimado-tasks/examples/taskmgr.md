@@ -34,6 +34,7 @@ Available tasks for this project:
 * cargo:run     # Run a binary or example of the local package
 * false         # ruby -e 'exit(1)'
 * sleep1        # ruby -e 'sleep(1)'
+* sleep2        # ruby -e 'sleep(2)'
 * sleepn        # ruby -e 'sleep(n)'
 * true          # ruby -e 'exit(0)'
 
@@ -42,12 +43,12 @@ Available tasks for this project:
 ## --parallel
 
 ```console
-$ taskmgr -p sleepn true sleepn -- 2
- sleepn | -> ruby -e 'sleep(2)'
-   true | -> ruby -e 'exit(0)'
- sleepn | -> ruby -e 'sleep(2)'
-   true | task finished
- sleepn | task finished
- sleepn | task finished
+$ taskmgr -p sleep1 true sleepn -- 2
+ sleep1.1 | -> ruby -e 'sleep(1)'
+   true.2 | -> ruby -e 'exit(0)'
+ sleepn.3 | -> ruby -e 'sleep(2)'
+   true.2 | <> task finished
+ sleep1.1 | <> task finished
+ sleepn.3 | <> task finished
 
 ```

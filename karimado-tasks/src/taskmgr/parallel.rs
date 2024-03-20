@@ -2,7 +2,7 @@
 #[path = "parallel_test.rs"]
 mod tests;
 
-use colored::Colorize;
+use colored::{Color, Colorize};
 use flurry::HashMap;
 use shared_child::SharedChild;
 use std::io::{BufRead, BufReader};
@@ -14,6 +14,21 @@ use std::time::Duration;
 
 use crate::{error::*, shell, Task};
 
+const COLORS: [Color; 12] = [
+    Color::Cyan,
+    Color::Yellow,
+    Color::Green,
+    Color::Magenta,
+    Color::Red,
+    Color::Blue,
+    Color::BrightCyan,
+    Color::BrightYellow,
+    Color::BrightGreen,
+    Color::BrightMagenta,
+    Color::BrightRed,
+    Color::BrightBlue,
+];
+
 const TASKS_WAITING: i32 = 0; // waiting to be done
 const TASKS_SUCCESS: i32 = 1; // done: all tasks succeed
 const TASKS_FAILURE: i32 = 2; // done: one of the tasks had failed
@@ -22,10 +37,11 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
     tasks: &[Task],
     watched: F,
 ) -> Result<()> {
-    let colored_task_name = |name: &str| format!(" {} |", name).purple();
+    let colored_task_name =
+        |name: &str, i: usize| format!(" {}.{} |", name, i).color(COLORS[i % COLORS.len()]);
     let maxwidth = tasks
         .iter()
-        .map(|task| colored_task_name(&task.name).len())
+        .map(|task| colored_task_name(&task.name, 0).len())
         .max()
         .unwrap_or(0);
 
@@ -44,7 +60,7 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
     // children: spawn all tasks
     let children: HashMap<usize, (String, Arc<SharedChild>)> = HashMap::with_capacity(tasks.len());
     for (task_id, task) in tasks.iter().enumerate() {
-        let task_name = colored_task_name(&task.name);
+        let task_name = colored_task_name(&task.name, task_id + 1);
         let line = format!("-> {}", task.command).green();
         log::info!("{:>w$} {}", task_name, line, w = maxwidth);
 
@@ -94,16 +110,16 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
             let code = status.code();
             match code {
                 Some(0) => {
-                    let line = "task finished".to_string();
+                    let line = "<> task finished".to_string();
                     log::info!("{:>w$} {}", waiter_task_name, line.blue(), w = maxwidth);
                 }
                 Some(c) => {
-                    let line = format!("task exited with code {}", c);
+                    let line = format!("<> task exited with code {}", c);
                     log::info!("{:>w$} {}", waiter_task_name, line.red(), w = maxwidth);
                     tasks_status_init(&waiter_tasks_status, TASKS_FAILURE);
                 }
                 None => {
-                    let line = "task terminated".to_string();
+                    let line = "<> task terminated".to_string();
                     log::info!("{:>w$} {}", waiter_task_name, line.yellow(), w = maxwidth);
                     tasks_status_init(&waiter_tasks_status, TASKS_FAILURE);
                 }

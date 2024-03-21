@@ -73,7 +73,7 @@ fn build_taskfile_include(include: &taskfile::Include, ctx: &mut BuildingContext
         let taskfile = &include.taskfile;
         let dir = ctx.taskfile_dir.display();
         let e = format!("taskfile `{}` does not exists under {}", taskfile, dir);
-        Err(TaskFileParseFailedKind::ParseIncludeFailed(e))?;
+        Err(TaskFileParseErrorKind::ParseIncludeError(e))?;
     }
 
     log::debug!("parsing taskfile {}", taskfile_path.display());
@@ -143,7 +143,7 @@ fn build_taskfile_task_command(task: &taskfile::Task, ctx: &mut BuildingContext)
     });
     let command = renderer
         .render_template(&task.command, &vars)
-        .map_err(TaskFileParseFailedKind::ParseTaskCommandFailed)?;
+        .map_err(TaskFileParseErrorKind::ParseTaskCommandError)?;
     Ok(command)
 }
 

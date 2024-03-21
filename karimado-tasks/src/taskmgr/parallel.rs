@@ -218,6 +218,6 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
     if retval.is_empty() {
         Ok(())
     } else {
-        Err(Error::TaskRunFailed(retval.to_string()))
+        Err(Error::TaskRunError(retval.to_string()))
     }
 }

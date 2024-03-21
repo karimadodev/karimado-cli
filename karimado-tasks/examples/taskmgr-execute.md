@@ -35,6 +35,6 @@ $ taskmgr-execute sleep1 false sleep1
 
 -> ruby -e 'exit(1)'
 
-Error: TaskRunFailed("failed to run task `false`, exited with code 1")
+Error: TaskRunError("failed to run task `false`, exited with code 1")
 
 ```

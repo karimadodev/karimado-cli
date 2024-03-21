@@ -27,7 +27,7 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
             if let Some(errmsg) = watched() {
                 child.kill().expect("failed to kill command");
                 child.wait().expect("failed to wait command");
-                return Err(Error::TaskRunFailed(errmsg));
+                return Err(Error::TaskRunError(errmsg));
             }
 
             // terminated by taskmgr
@@ -56,5 +56,5 @@ fn handle_finished_task_exit_status(task: &Task, status: &ExitStatus) -> Result<
     } else {
         format!("failed to run task `{}`, terminated by signal", task.name)
     };
-    Err(Error::TaskRunFailed(errmsg))
+    Err(Error::TaskRunError(errmsg))
 }

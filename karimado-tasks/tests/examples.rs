@@ -40,5 +40,5 @@ fn examples_taskmgr_ctrlc() {
     assert!(stderr.contains(" sleepn.2 | -> ruby -e 'sleep(4)'"));
     assert!(stderr.contains(" sleepn.1 | <> task terminated"));
     assert!(stderr.contains(" sleepn.2 | <> task terminated"));
-    assert!(stderr.contains("TaskRunFailed(\"received Ctrl-C signal\")"))
+    assert!(stderr.contains("TaskRunError(\"received Ctrl-C signal\")"))
 }

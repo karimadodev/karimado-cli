@@ -30,7 +30,7 @@ fn err_command_not_found() {
 
     let r = execute(&tasks, || None);
     assert!(r.is_err());
-    assert!(matches!(r, Err(Error::TaskRunFailed(_))));
+    assert!(matches!(r, Err(Error::TaskRunError(_))));
 
     let e = r.unwrap_err().to_string();
     assert!(e.clone().contains("failed to run task"));
@@ -46,7 +46,7 @@ fn err_exit_code_is_nonzero() {
 
     let r = execute(&tasks, || None);
     assert!(r.is_err());
-    assert!(matches!(r, Err(Error::TaskRunFailed(_))));
+    assert!(matches!(r, Err(Error::TaskRunError(_))));
 
     let e = r.unwrap_err().to_string();
     assert!(e.clone().contains("failed to run task"));
@@ -75,7 +75,7 @@ fn err_watched_timeout() {
         }
     });
     assert!(r.is_err());
-    assert!(matches!(r, Err(Error::TaskRunFailed(_))));
+    assert!(matches!(r, Err(Error::TaskRunError(_))));
 
     let e = r.unwrap_err().to_string();
     assert!(e.clone().contains("timeout exceeded"));

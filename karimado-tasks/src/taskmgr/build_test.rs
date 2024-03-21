@@ -102,7 +102,7 @@ fn err_taskfile_include_nonexists() {
     let taskfile = "tests/fixtures/taskmgr/build/err-taskfile-include-nonexists/tasks.toml";
     let r = load_tasks_from(taskfile, &[]);
     assert!(r.is_err());
-    assert!(matches!(r, Err(Error::TaskFileParseFailed(_))));
+    assert!(matches!(r, Err(Error::TaskFileParseError(_))));
 
     let e = r.unwrap_err().to_string();
     assert!(e.contains("taskfile `tasks/nonexists.toml` does not exists under"));

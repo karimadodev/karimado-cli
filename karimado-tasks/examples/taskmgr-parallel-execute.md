@@ -35,6 +35,6 @@ $ taskmgr-parallel-execute false sleep1
  sleep1.2 | -> ruby -e 'sleep(1)'
   false.1 | <> task exited with code 1
  sleep1.2 | <> task [..]
-Error: TaskRunFailed("failed to run task `false`, exited with code 1")
+Error: TaskRunError("failed to run task `false`, exited with code 1")
 
 ```

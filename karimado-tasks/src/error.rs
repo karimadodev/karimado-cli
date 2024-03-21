@@ -5,19 +5,19 @@ pub enum Error {
     #[error("task `{0}` does not exist")]
     TaskNotFound(String),
     #[error("{0}")]
-    TaskRunFailed(String),
+    TaskRunError(String),
     #[error(transparent)]
-    TaskFileParseFailed(#[from] TaskFileParseFailedKind),
+    TaskFileParseError(#[from] TaskFileParseErrorKind),
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum TaskFileParseFailedKind {
+pub enum TaskFileParseErrorKind {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
     #[error(transparent)]
     TomlError(#[from] toml::de::Error),
     #[error("{0}")]
-    ParseIncludeFailed(String),
+    ParseIncludeError(String),
     #[error(transparent)]
-    ParseTaskCommandFailed(#[from] handlebars::RenderError),
+    ParseTaskCommandError(#[from] handlebars::RenderError),
 }

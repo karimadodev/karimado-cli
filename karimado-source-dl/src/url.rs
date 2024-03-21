@@ -6,7 +6,7 @@ use std::str::FromStr;
 use strum::IntoEnumIterator;
 
 use crate::error::*;
-use UrlParseErrorKind::{UrlParseError, UnknownScheme};
+use UrlParseErrorKind::{UnknownScheme, UrlParseError};
 
 pub(crate) use scheme::*;
 
@@ -22,14 +22,12 @@ impl Url {
         Ok(Self { url, scheme })
     }
 
-    fn parse_scheme(scheme: &str) -> Result<Scheme> {
-        if let Ok(scheme) = Scheme::from_str(scheme) {
-            Ok(scheme)
-        } else {
+    fn parse_scheme(str: &str) -> Result<Scheme> {
+        Scheme::from_str(str).map_err(|_| {
             let v = Vec::from_iter(Scheme::iter().map(|v| v.to_string()));
-            let e = format!("the scheme was expected one of {:?} but got {:?}", v, scheme);
-            Err(UnknownScheme(e))?
-        }
+            let e = format!("the scheme was expected one of {:?} but got {:?}", v, str);
+            Error::UrlParseError(UnknownScheme(e))
+        })
     }
 
     pub fn scheme(&self) -> Scheme {

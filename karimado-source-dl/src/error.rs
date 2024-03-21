@@ -17,4 +17,7 @@ pub enum UrlParseErrorKind {
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum SourceDownloadErrorKind {}
+pub enum SourceDownloadErrorKind {
+    #[error(transparent)]
+    Git2Error(#[from] git2::Error),
+}

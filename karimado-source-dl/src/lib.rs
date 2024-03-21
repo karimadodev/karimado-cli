@@ -2,6 +2,7 @@
 mod tests;
 
 mod backend;
+mod contrib;
 mod download;
 mod downloader;
 mod error;

@@ -1,8 +1,6 @@
 use clap::Parser;
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]

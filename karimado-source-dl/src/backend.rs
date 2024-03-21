@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use crate::{error::*, url::*};
 
 pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
-    match url.scheme {
+    match url.scheme() {
         Scheme::GitHttps => git_https_download(url, downloads_path),
         Scheme::Https => https_download(url, downloads_path),
         Scheme::Http => http_download(url, downloads_path),

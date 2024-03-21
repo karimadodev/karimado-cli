@@ -1,6 +1,6 @@
 use strum::{Display, EnumIter, EnumString};
 
-#[derive(Display, EnumIter, EnumString)]
+#[derive(Clone, Display, EnumIter, EnumString)]
 pub(crate) enum Scheme {
     #[strum(serialize = "git+https")]
     GitHttps,

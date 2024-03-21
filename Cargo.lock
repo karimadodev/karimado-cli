@@ -972,8 +972,13 @@ version = "0.0.0"
 dependencies = [
  "ctor",
  "env_logger",
+ "fastrand",
+ "git2",
  "log",
+ "reqwest",
+ "strum",
  "thiserror",
+ "url",
 ]
 
 [[package]]

@@ -23,22 +23,22 @@ impl TaskMgrBuilder {
         Default::default()
     }
 
-    pub fn current_dir(mut self, current_dir: &Path) -> Self {
+    pub fn current_dir(&mut self, current_dir: &Path) -> &mut Self {
         self.current_dir = current_dir.to_path_buf();
         self
     }
 
-    pub fn taskfile(mut self, taskfile: &str) -> Self {
+    pub fn taskfile(&mut self, taskfile: &str) -> &mut Self {
         self.taskfile = taskfile.to_string();
         self
     }
 
-    pub fn cli_args(mut self, args: &[String]) -> Self {
+    pub fn cli_args(&mut self, args: &[String]) -> &mut Self {
         self.cli_args = args.to_vec();
         self
     }
 
-    pub fn build(self) -> Result<TaskMgr> {
+    pub fn build(&self) -> Result<TaskMgr> {
         let tasks = build::build(&self.current_dir, &self.taskfile, &self.cli_args)?;
         Ok(TaskMgr { tasks })
     }

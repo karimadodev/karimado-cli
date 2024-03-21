@@ -2,7 +2,7 @@ use super::*;
 
 fn load_tasks_from(taskfile: &str, cli_args: &[String]) -> Result<Vec<Task>> {
     let current_dir = std::env::current_dir().unwrap();
-    build(&current_dir, taskfile, &cli_args)
+    build(&current_dir, taskfile, cli_args)
 }
 
 fn load_tasks_from_ok_taskfile() -> Vec<Task> {
@@ -100,7 +100,7 @@ fn ok_tasks_current_dir_command_working_dir() {
 #[test]
 fn err_taskfile_include_nonexists() {
     let taskfile = "tests/fixtures/taskmgr/build/err-taskfile-include-nonexists/tasks.toml";
-    let r = load_tasks_from(taskfile, &vec![]);
+    let r = load_tasks_from(taskfile, &[]);
     assert!(r.is_err());
     assert!(matches!(r, Err(Error::TaskFileParseFailed(_))));
 

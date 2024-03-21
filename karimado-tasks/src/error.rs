@@ -10,6 +10,7 @@ pub enum Error {
     TaskFileParseError(#[from] TaskFileParseErrorKind),
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, thiserror::Error)]
 pub enum TaskFileParseErrorKind {
     #[error(transparent)]

@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "gzip_test.rs"]
+mod tests;
+
 use flate2::read::GzDecoder;
 use std::fs::File;
 use std::path::Path;

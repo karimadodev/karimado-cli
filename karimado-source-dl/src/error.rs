@@ -16,8 +16,13 @@ pub enum UrlParseErrorKind {
     UnknownScheme(String),
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, thiserror::Error)]
 pub enum SourceDownloadErrorKind {
     #[error(transparent)]
+    IoError(#[from] std::io::Error),
+    #[error(transparent)]
     Git2Error(#[from] git2::Error),
+    #[error(transparent)]
+    ReqwestError(#[from] reqwest::Error),
 }

@@ -1,14 +1,20 @@
-mod scheme;
-
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
-use strum::IntoEnumIterator;
+use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
 
 use crate::error::*;
 use UrlParseErrorKind::{UnknownScheme, UrlParseError};
 
-pub(crate) use scheme::*;
+#[derive(Clone, Display, EnumIter, EnumString)]
+pub(crate) enum Scheme {
+    #[strum(serialize = "git+https")]
+    GitHttps,
+    #[strum(serialize = "https")]
+    Https,
+    #[strum(serialize = "http")]
+    Http,
+}
 
 pub(crate) struct Url {
     url: url::Url,

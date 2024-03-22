@@ -6,6 +6,8 @@ pub enum Error {
     UrlParseError(#[from] UrlParseErrorKind),
     #[error(transparent)]
     SourceDownloadError(#[from] SourceDownloadErrorKind),
+    #[error(transparent)]
+    SourceDecompressError(#[from] SourceDecompressErrorKind),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -25,4 +27,14 @@ pub enum SourceDownloadErrorKind {
     Git2Error(#[from] git2::Error),
     #[error(transparent)]
     ReqwestError(#[from] reqwest::Error),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum SourceDecompressErrorKind {
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
+    #[error(transparent)]
+    ZipError(#[from] zip::result::ZipError),
+    #[error("{0}")]
+    UnknownMimeType(String),
 }

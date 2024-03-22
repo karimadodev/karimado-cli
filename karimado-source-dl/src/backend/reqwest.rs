@@ -44,13 +44,13 @@ fn builder_proxies() -> Result<Vec<Proxy>> {
 
     for var in ["HTTPS_PROXY", "ALL_PROXY"] {
         if let Ok(url) = env::var(var) {
-            log::debug!("set up proxy using env {}={}", var, url);
+            log::debug!("set up https proxy using env {}={}", var, url);
             proxies.push(Proxy::https(url).map_err(ReqwestError)?);
         }
     }
     for var in ["HTTP_PROXY", "ALL_PROXY"] {
         if let Ok(url) = env::var(var) {
-            log::debug!("set up proxy using env {}={}", var, url);
+            log::debug!("set up http proxy using env {}={}", var, url);
             proxies.push(Proxy::http(url).map_err(ReqwestError)?);
         }
     }

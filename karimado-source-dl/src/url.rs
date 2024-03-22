@@ -22,8 +22,8 @@ pub(crate) struct Url {
 }
 
 impl Url {
-    pub(crate) fn parse(input: &str) -> Result<Self> {
-        let url = url::Url::parse(input).map_err(UrlParseError)?;
+    pub(crate) fn parse(str: &str) -> Result<Self> {
+        let url = url::Url::parse(str).map_err(UrlParseError)?;
         let scheme = Self::parse_scheme(url.scheme())?;
         Ok(Self { url, scheme })
     }

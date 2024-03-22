@@ -974,11 +974,13 @@ dependencies = [
  "env_logger",
  "fastrand",
  "git2",
+ "infer",
  "log",
  "reqwest",
  "strum",
  "thiserror",
  "url",
+ "zip",
 ]
 
 [[package]]

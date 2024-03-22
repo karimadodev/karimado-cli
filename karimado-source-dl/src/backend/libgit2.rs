@@ -42,7 +42,7 @@ fn builder_proxy_options(repo_url: &str) -> Option<ProxyOptions> {
     let proxy_options_from_vars = |vars: &[&str]| -> Option<ProxyOptions> {
         for var in vars {
             if let Ok(url) = env::var(var) {
-                log::debug!("set up proxy using env {}={}", var, url);
+                log::debug!("set up http(s) proxy using env {}={}", var, url);
                 let mut options = ProxyOptions::new();
                 options.url(&url);
                 return Some(options);

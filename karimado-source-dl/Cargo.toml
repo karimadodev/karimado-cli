@@ -10,10 +10,12 @@ edition = "2021"
 fastrand = "2.0.1"
 git2 = "0.18.2"
 log = "0.4.21"
+infer = "0.15.0"
 reqwest = { version = "0.11.24", features = ["blocking"] }
 strum = { version = "0.26.1", features = ["derive"] }
 thiserror = "1.0.58"
 url = "2.5.0"
+zip = "0.6.6"
 
 [dev-dependencies]
 ctor = "0.2.7"

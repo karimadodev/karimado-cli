@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "reqwest_test.rs"]
+mod tests;
+
 use reqwest::blocking::{Client, Response};
 use reqwest::Proxy;
 use std::env;

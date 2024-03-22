@@ -8,16 +8,16 @@ edition = "2021"
 
 [dependencies]
 fastrand = "2.0.1"
+flate2 = "1.0.28"
 git2 = "0.18.2"
-log = "0.4.21"
 infer = "0.15.0"
+log = "0.4.21"
 reqwest = { version = "0.11.24", features = ["blocking"] }
 strum = { version = "0.26.1", features = ["derive"] }
+tar = "0.4.40"
 thiserror = "1.0.58"
 url = "2.5.0"
 zip = "0.6.6"
-flate2 = "1.0.28"
-tar = "0.4.40"
 
 [dev-dependencies]
 ctor = "0.2.7"

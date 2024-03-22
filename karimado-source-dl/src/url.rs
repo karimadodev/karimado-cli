@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "url_test.rs"]
+mod tests;
+
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -6,7 +10,7 @@ use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
 use crate::error::*;
 use UrlParseErrorKind::{UnknownScheme, UrlParseError};
 
-#[derive(Clone, Display, EnumIter, EnumString)]
+#[derive(Clone, Debug, Display, EnumIter, EnumString)]
 pub(crate) enum Scheme {
     #[strum(serialize = "git+https")]
     GitHttps,
@@ -16,6 +20,7 @@ pub(crate) enum Scheme {
     Http,
 }
 
+#[derive(Debug)]
 pub(crate) struct Url {
     url: url::Url,
     scheme: Scheme,

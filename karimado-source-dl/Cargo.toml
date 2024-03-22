@@ -16,6 +16,8 @@ strum = { version = "0.26.1", features = ["derive"] }
 thiserror = "1.0.58"
 url = "2.5.0"
 zip = "0.6.6"
+flate2 = "1.0.28"
+tar = "0.4.40"
 
 [dev-dependencies]
 ctor = "0.2.7"

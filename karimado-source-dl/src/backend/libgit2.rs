@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "libgit2_test.rs"]
+mod tests;
+
 use git2::{build::RepoBuilder, FetchOptions, ProxyOptions, Repository};
 use std::env;
 use std::path::{Path, PathBuf};

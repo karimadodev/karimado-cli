@@ -34,11 +34,11 @@ fn ok_http() {
 }
 
 #[test]
-fn err_unknown() {
+fn err_unknown_scheme() {
     let u = "un://github.com/karimadodev/karimado-cli";
     let r = Url::parse(u);
     assert!(r.is_err());
-    assert!(matches!(r, Err(Error::UrlParseError(_))));
+    assert!(matches!(r, Err(Error::UrlParseError(UnknownScheme(_)))));
 
     let e = r.unwrap_err().to_string();
     assert!(e.contains("the scheme was expected one of"));

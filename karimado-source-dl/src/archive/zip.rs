@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "zip_test.rs"]
+mod tests;
+
 use std::{fs::File, path::Path};
 
 use crate::error::*;

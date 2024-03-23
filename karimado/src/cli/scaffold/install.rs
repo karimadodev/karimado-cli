@@ -4,11 +4,10 @@ use std::{fs, path::Path};
 use strum::Display;
 use url::Url;
 
-use crate::{
-    config::{self, Config},
-    contrib,
-    core::{download, rsync},
-};
+use crate::config::{self, Config};
+use crate::contrib;
+use crate::core::rsync;
+use karimado_source_dl::Downloader;
 
 #[derive(Args)]
 pub(crate) struct InstallCommand {
@@ -84,7 +83,10 @@ impl InstallCommand {
             log::info!("Found cache in {}", path.display());
         } else {
             log::info!("Fetching from {}", url);
-            let download_path = download::download(url, &root_path.join("tmp/downloads"))?;
+            let download_path = Downloader::new()
+                .current_dir(root_path)
+                .downloads_dir(&root_path.join("tmp/downloads"))
+                .download(url.as_ref())?;
             fs::rename(download_path, path)?;
         }
 

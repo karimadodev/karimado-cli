@@ -994,6 +994,7 @@ dependencies = [
  "tar",
  "tempfile",
  "thiserror",
+ "trycmd",
  "url",
  "walkdir",
  "zip",

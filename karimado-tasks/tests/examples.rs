@@ -28,7 +28,7 @@ fn examples_taskmgr_ctrlc() {
         .stderr(Stdio::piped())
         .spawn()
         .unwrap();
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(1000));
     signal::kill(Pid::from_raw(child.id() as i32), Signal::SIGINT).unwrap();
 
     let output = child.wait_with_output().unwrap();

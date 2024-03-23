@@ -5,7 +5,7 @@ fn ok() {
     let tmpdir = tempfile::TempDir::new().unwrap();
     let downloads_dir = tmpdir.path();
     let url = Url::parse_with_quirks_mode(
-        "https://github.com/karimadodev/karimado-cli.git#8afbd6d",
+        "git+https://github.com/karimadodev/karimado-cli.git#8afbd6d",
         None,
     )
     .unwrap();

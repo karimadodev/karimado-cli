@@ -17,6 +17,15 @@ fn ok() {
 }
 
 #[test]
+fn ok_current_dir() {
+    let mut downloader = Downloader::new();
+    downloader.current_dir(&env::current_dir().unwrap().join("tests/fixtures"));
+
+    let r = downloader.download("archive/hello-world.tar.gz");
+    assert!(r.is_ok());
+}
+
+#[test]
 fn ok_downloads_path() {
     let tmpdir = TempDir::new().unwrap();
     let mut downloader = Downloader::new();

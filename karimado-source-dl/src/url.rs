@@ -4,6 +4,7 @@ mod tests;
 
 use std::fmt;
 use std::fmt::{Display, Formatter};
+use std::path::PathBuf;
 use std::str::FromStr;
 use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
 
@@ -12,6 +13,8 @@ use UrlParseErrorKind::{UnknownScheme, UrlParseError};
 
 #[derive(Clone, Debug, Display, EnumIter, EnumString)]
 pub(crate) enum Scheme {
+    #[strum(serialize = "file")]
+    File,
     #[strum(serialize = "git+https")]
     GitHttps,
     #[strum(serialize = "https")]
@@ -47,6 +50,10 @@ impl Url {
 
     pub fn fragment(&self) -> Option<&str> {
         self.url.fragment()
+    }
+
+    pub fn to_file_path(&self) -> std::result::Result<PathBuf, ()> {
+        self.url.to_file_path()
     }
 }
 

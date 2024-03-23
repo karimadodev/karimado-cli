@@ -983,6 +983,7 @@ dependencies = [
  "tempfile",
  "thiserror",
  "url",
+ "walkdir",
  "zip",
 ]
 

@@ -1,4 +1,5 @@
 mod libgit2;
+mod local;
 mod reqwest;
 
 use std::path::{Path, PathBuf};
@@ -7,10 +8,15 @@ use crate::{error::*, url::*};
 
 pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
     match url.scheme() {
+        Scheme::File => file_download(url, downloads_path),
         Scheme::GitHttps => git_https_download(url, downloads_path),
         Scheme::Https => https_download(url, downloads_path),
         Scheme::Http => http_download(url, downloads_path),
     }
+}
+
+fn file_download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
+    local::download(url, downloads_path)
 }
 
 fn git_https_download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {

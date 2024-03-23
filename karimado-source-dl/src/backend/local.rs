@@ -6,13 +6,19 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-use crate::{contrib, error::*, Url};
+use crate::{archive, contrib, error::*, Url};
 use SourceDownloadErrorKind::IoError;
 
 pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
     let source = url.to_file_path().unwrap();
     let destination = downloads_path.join(contrib::uuid());
-    sync(&source, &destination)?;
+
+    if source.is_dir() {
+        sync(&source, &destination)?;
+    } else {
+        archive::decompress(&source, &destination)?;
+    }
+
     Ok(destination)
 }
 

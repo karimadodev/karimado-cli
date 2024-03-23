@@ -6,7 +6,7 @@ fn examples() {
         .case("examples/taskmgr.md");
 }
 
-#[cfg(target_family = "unix")]
+#[cfg(unix)]
 #[test]
 fn examples_taskmgr_ctrlc() {
     use escargot::CargoBuild;

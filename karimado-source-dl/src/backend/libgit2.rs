@@ -10,8 +10,7 @@ use crate::{contrib, error::*, Url};
 use SourceDownloadErrorKind::Git2Error;
 
 pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
-    let repo_name: String = contrib::uuid();
-    let repo_path = downloads_path.join(repo_name);
+    let repo_path = downloads_path.join(contrib::uuid());
     let repo = git_clone_repoistory(&url.to_string(), &repo_path)?;
 
     if let Some(committish) = url.fragment() {

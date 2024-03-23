@@ -1,6 +1,17 @@
 use super::*;
 
 #[test]
+fn ok_file() {
+    let u = format!("file://{}", "/home/root");
+    let r = Url::parse(&u);
+    assert!(r.is_ok());
+
+    let r = r.unwrap();
+    assert!(matches!(r.scheme(), Scheme::File));
+    assert_eq!(r.to_file_path().unwrap().to_str().unwrap(), "/home/root");
+}
+
+#[test]
 fn ok_git_https() {
     let u = "git+https://github.com/karimadodev/karimado-cli";
     let r = Url::parse(u);

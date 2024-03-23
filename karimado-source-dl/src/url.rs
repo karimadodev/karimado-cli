@@ -48,12 +48,11 @@ impl Url {
         self.scheme.clone()
     }
 
-    pub fn fragment(&self) -> Option<&str> {
-        self.url.fragment()
-    }
-
-    pub fn to_file_path(&self) -> std::result::Result<PathBuf, ()> {
-        self.url.to_file_path()
+    delegate::delegate! {
+        to self.url {
+            pub fn fragment(&self) -> Option<&str>;
+            pub fn to_file_path(&self) -> std::result::Result<PathBuf, ()>;
+        }
     }
 }
 

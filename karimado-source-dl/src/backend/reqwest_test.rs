@@ -8,10 +8,10 @@ fn ok() {
     let r = download(&url, downloads_path);
     assert!(r.is_ok());
 
-    let target_path = r.unwrap();
-    assert!(target_path.join("src").is_dir());
-    assert!(target_path.join("src/main.rs").is_file());
-    assert!(target_path.join("Cargo.lock").is_file());
-    assert!(target_path.join("Cargo.toml").is_file());
-    assert!(target_path.join(".gitignore").is_file());
+    let path = r.unwrap();
+    assert!(path.join("src").is_dir());
+    assert!(path.join("src/main.rs").is_file());
+    assert!(path.join("Cargo.lock").is_file());
+    assert!(path.join("Cargo.toml").is_file());
+    assert!(path.join(".gitignore").is_file());
 }

@@ -8,7 +8,9 @@ fn ok_file() {
 
     let url = r.unwrap();
     assert!(matches!(url.scheme(), Scheme::File));
-    assert_eq!(url.to_file_path().unwrap().to_str().unwrap(), "/home/root");
+
+    let path = url.to_file_path().unwrap();
+    assert_eq!(path.to_str().unwrap(), "/home/root");
 }
 
 #[test]
@@ -20,11 +22,11 @@ fn ok_file_absolute_path() {
     let url = r.unwrap();
     assert!(matches!(url.scheme(), Scheme::File));
 
-    let file_path = url.to_file_path().unwrap();
+    let path = url.to_file_path().unwrap();
     #[cfg(unix)]
-    assert_eq!(file_path.to_str().unwrap(), "/home/root");
+    assert_eq!(path.to_str().unwrap(), "/home/root");
     #[cfg(windows)]
-    assert_eq!(file_path.to_str().unwrap(), "D:\\home\\root");
+    assert_eq!(path.to_str().unwrap(), "D:\\home\\root");
 }
 
 #[test]

@@ -13,16 +13,16 @@ use std::path::{Path, PathBuf};
 use crate::{archive, contrib, error::*, Url};
 use SourceDownloadErrorKind::{IoError, ReqwestError};
 
-pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
+pub(crate) fn download(url: &Url, downloads_dir: &Path) -> Result<PathBuf> {
     let archive_url = url.to_string();
     let mut response = http_get(&archive_url)?;
 
     let archive_name: String = contrib::uuid();
-    let archive_path = downloads_path.join(archive_name.clone() + ".download");
+    let archive_path = downloads_dir.join(archive_name.clone() + ".download");
     let mut file = File::create(&archive_path).map_err(IoError)?;
     io::copy(&mut response, &mut file).map_err(IoError)?;
 
-    let target_path = downloads_path.join(archive_name);
+    let target_path = downloads_dir.join(archive_name);
     archive::decompress(&archive_path, &target_path)?;
     fs::remove_file(&archive_path).map_err(IoError)?;
 

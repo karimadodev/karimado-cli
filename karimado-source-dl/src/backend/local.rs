@@ -9,9 +9,9 @@ use walkdir::WalkDir;
 use crate::{archive, contrib, error::*, Url};
 use SourceDownloadErrorKind::IoError;
 
-pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
+pub(crate) fn download(url: &Url, downloads_dir: &Path) -> Result<PathBuf> {
     let source = url.to_file_path().unwrap();
-    let destination = downloads_path.join(contrib::uuid());
+    let destination = downloads_dir.join(contrib::uuid());
 
     if source.is_dir() {
         sync(&source, &destination)?;

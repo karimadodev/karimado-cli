@@ -26,12 +26,12 @@ fn ok_current_dir() {
 }
 
 #[test]
-fn ok_downloads_path() {
+fn ok_downloads_dir() {
     let tmpdir = TempDir::new().unwrap();
     let mut downloader = Downloader::new();
-    downloader.downloads_path(tmpdir.path());
+    downloader.downloads_dir(tmpdir.path());
 
-    let r = downloader.download("tests/fixtures/archive/hello-world.tar.gz");
+    let r = downloader.download("tests/fixtures/archive/hello-world.zip");
     assert!(r.is_ok());
 
     let path = r.unwrap();

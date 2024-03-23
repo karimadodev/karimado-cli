@@ -9,8 +9,8 @@ use std::path::{Path, PathBuf};
 use crate::{contrib, error::*, Url};
 use SourceDownloadErrorKind::Git2Error;
 
-pub(crate) fn download(url: &Url, downloads_path: &Path) -> Result<PathBuf> {
-    let repo_path = downloads_path.join(contrib::uuid());
+pub(crate) fn download(url: &Url, downloads_dir: &Path) -> Result<PathBuf> {
+    let repo_path = downloads_dir.join(contrib::uuid());
     let repo = git_clone_repoistory(&url.to_string(), &repo_path)?;
 
     if let Some(committish) = url.fragment() {

@@ -3,10 +3,10 @@ use super::*;
 #[test]
 fn ok_dir() {
     let tmpdir = tempfile::TempDir::new().unwrap();
-    let downloads_path = tmpdir.path();
+    let downloads_dir = tmpdir.path();
     let filename = "tests/fixtures/archive/hello-world";
     let url = Url::parse_with_quirks_mode(filename, None).unwrap();
-    let r = download(&url, downloads_path);
+    let r = download(&url, downloads_dir);
     assert!(r.is_ok());
 
     let path = r.unwrap();
@@ -20,10 +20,10 @@ fn ok_dir() {
 #[test]
 fn ok_file() {
     let tmpdir = tempfile::TempDir::new().unwrap();
-    let downloads_path = tmpdir.path();
+    let downloads_dir = tmpdir.path();
     let filename = "tests/fixtures/archive/hello-world.tar.gz";
     let url = Url::parse_with_quirks_mode(filename, None).unwrap();
-    let r = download(&url, downloads_path);
+    let r = download(&url, downloads_dir);
     assert!(r.is_ok());
 
     let path = r.unwrap();

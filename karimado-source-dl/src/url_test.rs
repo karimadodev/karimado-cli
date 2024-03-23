@@ -6,9 +6,9 @@ fn ok_file() {
     let r = Url::parse_with_quirks_mode(&u, None);
     assert!(r.is_ok());
 
-    let r = r.unwrap();
-    assert!(matches!(r.scheme(), Scheme::File));
-    assert_eq!(r.to_file_path().unwrap().to_str().unwrap(), "/home/root");
+    let url = r.unwrap();
+    assert!(matches!(url.scheme(), Scheme::File));
+    assert_eq!(url.to_file_path().unwrap().to_str().unwrap(), "/home/root");
 }
 
 #[test]
@@ -17,9 +17,14 @@ fn ok_file_absolute_path() {
     let r = Url::parse_with_quirks_mode(&u, None);
     assert!(r.is_ok());
 
-    let r = r.unwrap();
-    assert!(matches!(r.scheme(), Scheme::File));
-    assert_eq!(r.to_file_path().unwrap().to_str().unwrap(), "/home/root");
+    let url = r.unwrap();
+    assert!(matches!(url.scheme(), Scheme::File));
+
+    let file_path = url.to_file_path().unwrap();
+    #[cfg(unix)]
+    assert_eq!(file_path.to_str().unwrap(), "/home/root");
+    #[cfg(windows)]
+    assert_eq!(file_path.to_str().unwrap(), "D:\\home\\root");
 }
 
 #[test]
@@ -28,10 +33,10 @@ fn ok_file_relative_path() {
     let r = Url::parse_with_quirks_mode(&u, None);
     assert!(r.is_ok());
 
-    let r = r.unwrap();
-    assert!(matches!(r.scheme(), Scheme::File));
+    let url = r.unwrap();
+    assert!(matches!(url.scheme(), Scheme::File));
 
-    let actual = r.to_file_path().unwrap();
+    let actual = url.to_file_path().unwrap();
     let expected = env::current_dir().unwrap().join("home/root");
     assert_eq!(actual, expected);
 }
@@ -42,9 +47,9 @@ fn ok_git_https() {
     let r = Url::parse_with_quirks_mode(&u, None);
     assert!(r.is_ok());
 
-    let r = r.unwrap();
-    assert!(matches!(r.scheme(), Scheme::GitHttps));
-    assert_eq!(r.to_string(), u);
+    let url = r.unwrap();
+    assert!(matches!(url.scheme(), Scheme::GitHttps));
+    assert_eq!(url.to_string(), u);
 }
 
 #[test]
@@ -53,9 +58,9 @@ fn ok_https() {
     let r = Url::parse_with_quirks_mode(&u, None);
     assert!(r.is_ok());
 
-    let r = r.unwrap();
-    assert!(matches!(r.scheme(), Scheme::Https));
-    assert_eq!(r.to_string(), u);
+    let url = r.unwrap();
+    assert!(matches!(url.scheme(), Scheme::Https));
+    assert_eq!(url.to_string(), u);
 }
 
 #[test]
@@ -64,9 +69,9 @@ fn ok_http() {
     let r = Url::parse_with_quirks_mode(&u, None);
     assert!(r.is_ok());
 
-    let r = r.unwrap();
-    assert!(matches!(r.scheme(), Scheme::Http));
-    assert_eq!(r.to_string(), u);
+    let url = r.unwrap();
+    assert!(matches!(url.scheme(), Scheme::Http));
+    assert_eq!(url.to_string(), u);
 }
 
 #[test]

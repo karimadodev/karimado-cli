@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "downloader_test.rs"]
+mod tests;
+
 use std::env;
 use std::path::{Path, PathBuf};
 

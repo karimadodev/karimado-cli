@@ -5,8 +5,7 @@ fn ok_dir() {
     let tmpdir = tempfile::TempDir::new().unwrap();
     let downloads_path = tmpdir.path();
     let filename = "tests/fixtures/archive/hello-world";
-    let filepath = std::env::current_dir().unwrap().join(filename);
-    let url = Url::parse(&format!("file://{}", filepath.to_str().unwrap())).unwrap();
+    let url = Url::parse_with_quirks_mode(filename, None).unwrap();
     let r = download(&url, downloads_path);
     assert!(r.is_ok());
 
@@ -23,8 +22,7 @@ fn ok_file() {
     let tmpdir = tempfile::TempDir::new().unwrap();
     let downloads_path = tmpdir.path();
     let filename = "tests/fixtures/archive/hello-world.tar.gz";
-    let filepath = std::env::current_dir().unwrap().join(filename);
-    let url = Url::parse(&format!("file://{}", filepath.to_str().unwrap())).unwrap();
+    let url = Url::parse_with_quirks_mode(filename, None).unwrap();
     let r = download(&url, downloads_path);
     assert!(r.is_ok());
 

@@ -19,7 +19,7 @@ impl Downloader {
     }
 
     pub fn download(&self, download: &Download) -> Result<PathBuf> {
-        let url = Url::parse(&download.url)?;
+        let url = Url::parse_with_quirks_mode(&download.url, None)?;
         let downloads_path = self.downloads_path.clone().unwrap_or(env::temp_dir());
         backend::download(&url, &downloads_path)
     }

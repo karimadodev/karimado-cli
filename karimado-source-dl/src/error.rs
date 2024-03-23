@@ -13,9 +13,13 @@ pub enum Error {
 #[derive(Debug, thiserror::Error)]
 pub enum UrlParseErrorKind {
     #[error(transparent)]
+    IoError(#[from] std::io::Error),
+    #[error(transparent)]
     UrlParseError(#[from] url::ParseError),
     #[error("{0}")]
     UnknownScheme(String),
+    #[error("filepath `{0}` is invalid")]
+    InvalidFilePath(String),
 }
 
 #[allow(clippy::enum_variant_names)]

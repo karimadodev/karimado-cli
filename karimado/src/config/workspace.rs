@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use url::Url;
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -18,7 +17,7 @@ pub(crate) struct Server {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct ServerScaffold {
-    pub(crate) url: Url,
+    pub(crate) url: String,
     #[serde(default)]
     pub(crate) template_path: String,
 }
@@ -33,7 +32,7 @@ pub(crate) struct Web {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct WebScaffold {
-    pub(crate) url: Url,
+    pub(crate) url: String,
     #[serde(default)]
     pub(crate) template_path: String,
 }

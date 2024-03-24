@@ -12,7 +12,7 @@ cargo install karimado
 
 ```console
 $ karimado --help
-Usage: karimado [OPTIONS] <COMMAND>
+Usage: karimado[EXE] [OPTIONS] <COMMAND>
 
 Commands:
   new               Create a new Karimado application at the path you specify

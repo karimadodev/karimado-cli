@@ -2,7 +2,6 @@ use anyhow::Result;
 use clap::Args;
 use std::{fs, path::Path};
 use strum::Display;
-use url::Url;
 
 use crate::config::{self, Config};
 use crate::contrib;
@@ -73,7 +72,7 @@ impl InstallCommand {
         &self,
         kind: ScaffoldKind,
         name: &str,
-        url: &Url,
+        url: &str,
         root_path: &Path,
     ) -> Result<()> {
         log::info!("Downloading {} scaffold `{}`...", kind, name);

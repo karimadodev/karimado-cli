@@ -21,7 +21,6 @@ rust-embed = "8.2.0"
 serde = { version = "1.0.196", features = ["derive"] }
 strum = { version = "0.26.1", features = ["derive"] }
 toml = "0.8.10"
-url = { version = "2.5.0", features = ["serde"] }
 walkdir = "2.5.0"
 
 [dependencies.karimado-source-dl]

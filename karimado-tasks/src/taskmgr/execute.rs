@@ -14,7 +14,7 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
     watched: F,
 ) -> Result<()> {
     for task in tasks {
-        log::info!("{}", format!("-> {}", task.command).green());
+        println!("{}", format!("-> {}", task.command).green());
         let mut child = shell::command(&task.command)
             .current_dir(&task.current_dir)
             .spawn()
@@ -34,7 +34,7 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
             let status = child.try_wait().expect("failed to try wait");
             if let Some(status) = status {
                 // finished task: exit with Err if failed, otherwise goto next task
-                log::info!("");
+                println!();
                 handle_finished_task_exit_status(task, &status)?;
                 break;
             } else {

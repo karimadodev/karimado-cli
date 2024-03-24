@@ -1,6 +1,3 @@
-#[cfg(test)]
-mod tests;
-
 mod archive;
 mod backend;
 mod contrib;

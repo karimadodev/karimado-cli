@@ -2,7 +2,8 @@
 #[path = "zip_test.rs"]
 mod tests;
 
-use std::{fs::File, path::Path};
+use std::fs::File;
+use std::path::Path;
 
 use crate::error::*;
 use SourceDecompressErrorKind::{IoError, ZipError};

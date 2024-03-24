@@ -23,14 +23,6 @@ struct Cli {
 }
 
 fn main() -> Result<(), karimado_tasks::Error> {
-    // logging
-    env_logger::builder()
-        .format_level(false)
-        .format_target(false)
-        .format_timestamp(None)
-        .filter_level(log::LevelFilter::Info)
-        .init();
-
     // Ctrl-C handler
     let terminated = Arc::new(AtomicBool::new(false));
     let watched_terminated = Arc::clone(&terminated);

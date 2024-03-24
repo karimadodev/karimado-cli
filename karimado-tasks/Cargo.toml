@@ -19,9 +19,7 @@ toml = "0.8.10"
 
 [dev-dependencies]
 clap = { version = "4.5.3", features = ["derive"] }
-ctor = "0.2.7"
 ctrlc = { version = "3.4.4", features = ["termination"] }
-env_logger = "0.11.2"
 escargot = "0.5.10"
 trycmd = { version = "0.15.0", features = ["examples"] }
 

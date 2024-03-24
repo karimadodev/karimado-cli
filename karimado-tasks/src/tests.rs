@@ -1,8 +1,3 @@
-#[ctor::ctor]
-fn global_setup() {
-    env_logger::builder().is_test(true).init();
-}
-
 #[macro_export]
 macro_rules! build_task {
     (name : $name:literal) => {

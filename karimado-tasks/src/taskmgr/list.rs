@@ -14,11 +14,11 @@ pub(crate) fn list(tasks: &[Task]) {
         .max()
         .unwrap_or(0);
 
-    log::info!("Available tasks for this project:");
+    println!("Available tasks for this project:");
     for task in tasks {
         let task_icon = "*".yellow();
         let task_name = format!("{:<w$}", colored_task_name(&task.name), w = maxwidth);
         let task_desc = format!("# {}", task.description.as_ref().unwrap_or(&task.command));
-        log::info!("{} {} {}", task_icon, task_name, task_desc);
+        println!("{} {} {}", task_icon, task_name, task_desc);
     }
 }

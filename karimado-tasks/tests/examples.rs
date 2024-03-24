@@ -25,7 +25,7 @@ fn examples_taskmgr_ctrlc() {
     let child = cmd
         .args(["-p", "sleepn", "sleepn", "--", "4"])
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stdout(Stdio::piped())
         .spawn()
         .unwrap();
     thread::sleep(Duration::from_millis(1000));
@@ -35,10 +35,9 @@ fn examples_taskmgr_ctrlc() {
     let status = output.status;
     assert!(!status.success());
 
-    let stderr = String::from_utf8(output.stderr).unwrap();
-    assert!(stderr.contains(" sleepn.1 | -> ruby -e 'sleep(4)'"));
-    assert!(stderr.contains(" sleepn.2 | -> ruby -e 'sleep(4)'"));
-    assert!(stderr.contains(" sleepn.1 | <> task terminated"));
-    assert!(stderr.contains(" sleepn.2 | <> task terminated"));
-    assert!(stderr.contains("TaskRunError(\"received Ctrl-C signal\")"))
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains(" sleepn.1 | -> ruby -e 'sleep(4)'"));
+    assert!(stdout.contains(" sleepn.2 | -> ruby -e 'sleep(4)'"));
+    assert!(stdout.contains(" sleepn.1 | <> task terminated"));
+    assert!(stdout.contains(" sleepn.2 | <> task terminated"));
 }

@@ -62,7 +62,7 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
     for (task_id, task) in tasks.iter().enumerate() {
         let task_name = colored_task_name(&task.name, task_id + 1);
         let line = format!("-> {}", task.command).green();
-        log::info!("{:>w$} {}", task_name, line, w = maxwidth);
+        println!("{:>w$} {}", task_name, line, w = maxwidth);
 
         // child: spawn
         let child = Arc::new(
@@ -81,9 +81,9 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
         stdout_thrs.push(thread::spawn(move || {
             for line in stdout_reader.lines() {
                 if let Ok(line) = line {
-                    log::info!("{:>w$} {}", stdout_task_name, line, w = maxwidth);
+                    println!("{:>w$} {}", stdout_task_name, line, w = maxwidth);
                 } else if let Err(line) = line {
-                    log::warn!("{:>w$} {}", stdout_task_name, line, w = maxwidth);
+                    println!("{:>w$} {}", stdout_task_name, line, w = maxwidth);
                 }
             }
         }));
@@ -94,9 +94,9 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
         stderr_thrs.push(thread::spawn(move || {
             for line in stderr_reader.lines() {
                 if let Ok(line) = line {
-                    log::info!("{:>w$} {}", stderr_task_name, line, w = maxwidth);
+                    println!("{:>w$} {}", stderr_task_name, line, w = maxwidth);
                 } else if let Err(line) = line {
-                    log::warn!("{:>w$} {}", stderr_task_name, line, w = maxwidth);
+                    println!("{:>w$} {}", stderr_task_name, line, w = maxwidth);
                 }
             }
         }));
@@ -111,16 +111,16 @@ pub(crate) fn execute<F: Fn() -> Option<String> + Send + 'static>(
             match code {
                 Some(0) => {
                     let line = "<> task finished".to_string();
-                    log::info!("{:>w$} {}", waiter_task_name, line.blue(), w = maxwidth);
+                    println!("{:>w$} {}", waiter_task_name, line.blue(), w = maxwidth);
                 }
                 Some(c) => {
                     let line = format!("<> task exited with code {}", c);
-                    log::info!("{:>w$} {}", waiter_task_name, line.red(), w = maxwidth);
+                    println!("{:>w$} {}", waiter_task_name, line.red(), w = maxwidth);
                     tasks_status_init(&waiter_tasks_status, TASKS_FAILURE);
                 }
                 None => {
                     let line = "<> task terminated".to_string();
-                    log::info!("{:>w$} {}", waiter_task_name, line.yellow(), w = maxwidth);
+                    println!("{:>w$} {}", waiter_task_name, line.yellow(), w = maxwidth);
                     tasks_status_init(&waiter_tasks_status, TASKS_FAILURE);
                 }
             }

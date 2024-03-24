@@ -16,7 +16,7 @@ fn ok_file() {
 #[test]
 fn ok_file_absolute_path() {
     let u = "/home/root";
-    let r = Url::parse_with_quirks_mode(&u, None);
+    let r = Url::parse_with_quirks_mode(u, None);
     assert!(r.is_ok());
 
     let url = r.unwrap();
@@ -32,7 +32,7 @@ fn ok_file_absolute_path() {
 #[test]
 fn ok_file_relative_path() {
     let u = "home/root";
-    let r = Url::parse_with_quirks_mode(&u, None);
+    let r = Url::parse_with_quirks_mode(u, None);
     assert!(r.is_ok());
 
     let url = r.unwrap();
@@ -46,7 +46,7 @@ fn ok_file_relative_path() {
 #[test]
 fn ok_git_https() {
     let u = "git+https://github.com/karimadodev/karimado-cli";
-    let r = Url::parse_with_quirks_mode(&u, None);
+    let r = Url::parse_with_quirks_mode(u, None);
     assert!(r.is_ok());
 
     let url = r.unwrap();
@@ -57,7 +57,7 @@ fn ok_git_https() {
 #[test]
 fn ok_https() {
     let u = "https://github.com/karimadodev/karimado-cli";
-    let r = Url::parse_with_quirks_mode(&u, None);
+    let r = Url::parse_with_quirks_mode(u, None);
     assert!(r.is_ok());
 
     let url = r.unwrap();
@@ -68,7 +68,7 @@ fn ok_https() {
 #[test]
 fn ok_http() {
     let u = "http://github.com/karimadodev/karimado-cli";
-    let r = Url::parse_with_quirks_mode(&u, None);
+    let r = Url::parse_with_quirks_mode(u, None);
     assert!(r.is_ok());
 
     let url = r.unwrap();
@@ -79,7 +79,7 @@ fn ok_http() {
 #[test]
 fn err_unknown_scheme() {
     let u = "un://github.com/karimadodev/karimado-cli";
-    let r = Url::parse_with_quirks_mode(&u, None);
+    let r = Url::parse_with_quirks_mode(u, None);
     assert!(r.is_err());
     assert!(matches!(r, Err(Error::UrlParseError(UnknownScheme(_)))));
 

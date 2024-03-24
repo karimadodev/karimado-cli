@@ -7,7 +7,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 
 use crate::{contrib, error::*, Url};
-use SourceDownloadErrorKind::Git2Error;
+use SourceDownloadErrorKind::{Git2Error, UnknownError};
 
 pub(crate) fn download(url: &Url, downloads_dir: &Path) -> Result<PathBuf> {
     let repo_url = url.to_string().replace("git+https://", "https://");
@@ -19,7 +19,12 @@ pub(crate) fn download(url: &Url, downloads_dir: &Path) -> Result<PathBuf> {
         repo.checkout_tree(&object, None).map_err(Git2Error)?;
 
         match reference {
-            Some(r) => repo.set_head(r.name().expect("invalid reference name")),
+            Some(r) => {
+                let name = r
+                    .name()
+                    .ok_or(UnknownError("invalid reference name".to_string()))?;
+                repo.set_head(name)
+            }
             None => repo.set_head_detached(object.id()),
         }
         .map_err(Git2Error)?;

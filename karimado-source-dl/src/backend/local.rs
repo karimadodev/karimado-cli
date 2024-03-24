@@ -7,10 +7,13 @@ use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
 use crate::{archive, contrib, error::*, Url};
-use SourceDownloadErrorKind::IoError;
+use SourceDownloadErrorKind::{IoError, UnknownError};
 
 pub(crate) fn download(url: &Url, downloads_dir: &Path) -> Result<PathBuf> {
-    let source = url.to_file_path().unwrap();
+    let source = url.to_file_path().map_err(|_| {
+        let e = "Url::to_file_path()".to_string();
+        Error::SourceDownloadError(UnknownError(e))
+    })?;
     let destination = downloads_dir.join(contrib::uuid());
 
     if source.is_dir() {

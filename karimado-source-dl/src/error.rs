@@ -31,6 +31,8 @@ pub enum SourceDownloadErrorKind {
     Git2Error(#[from] git2::Error),
     #[error(transparent)]
     ReqwestError(#[from] reqwest::Error),
+    #[error("{0}")]
+    UnknownError(String),
 }
 
 #[derive(Debug, thiserror::Error)]

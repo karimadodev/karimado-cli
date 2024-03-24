@@ -31,3 +31,6 @@ path = "../karimado-source-dl"
 [dependencies.karimado-tasks]
 version = "0.0.0"
 path = "../karimado-tasks"
+
+[dev-dependencies]
+trycmd = { version = "0.15.0", features = ["examples"] }

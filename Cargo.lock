@@ -969,6 +969,7 @@ dependencies = [
  "serde",
  "strum",
  "toml",
+ "trycmd",
  "url",
  "walkdir",
 ]

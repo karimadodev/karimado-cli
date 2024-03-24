@@ -14,7 +14,7 @@ karimado-source-dl = "0.0"
 ```rust
 fn main() {
     let url = "git+https://github.com/karimadodev/karimado-cli.git#8afbd6d";
-    let path = karimado_source_dl::Downloader::new().download(url).unwrap();
+    let path = karimado_source_dl::download(url).unwrap();
     println!("{}", path.display());
 }
 ```

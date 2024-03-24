@@ -4,7 +4,7 @@ fn main() {
         "https://github.com/karimadodev/karimado-cli/raw/main/karimado-source-dl/tests/fixtures/archive/hello-world.tar.gz",
         "tests/fixtures/archive/hello-world.zip",
     ] {
-        let path = karimado_source_dl::Downloader::new().download(url).unwrap();
+        let path = karimado_source_dl::download(url).unwrap();
         println!("Downloading source code...");
         println!("  source: {}", url);
         println!("  destination: {}", path.display());

@@ -959,22 +959,18 @@ dependencies = [
  "colored",
  "ctrlc",
  "env_logger",
- "fastrand",
  "git2",
  "globset",
- "infer",
  "karimado-source-dl",
  "karimado-tasks",
  "log",
  "path-absolutize",
- "reqwest",
  "rust-embed",
  "serde",
  "strum",
  "toml",
  "url",
  "walkdir",
- "zip",
 ]
 
 [[package]]

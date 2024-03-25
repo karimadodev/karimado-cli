@@ -107,3 +107,30 @@ fn err_include_nonexists() {
     let e = r.unwrap_err().to_string();
     assert!(e.contains("taskfile `tasks/nonexists.toml` does not exists under"));
 }
+
+#[test]
+fn ok_hbs_helper_getvar_or_default() {
+    let mut vars = JsonMap::new();
+    vars.insert("ARG_1".to_string(), json!(""));
+    vars.insert("ARG_2".to_string(), json!("abc"));
+
+    let mut renderer = handlebars::Handlebars::new();
+    let helper = Box::new(hbs_helper_getvar_or_default(vars.clone()));
+    renderer.register_helper("getvar_or_default", helper);
+
+    let r = renderer
+        .render_template("{{ getvar_or_default 'ARG_1' '123' }}", &vars)
+        .unwrap();
+    assert_eq!(r, "123");
+
+    let r = renderer
+        .render_template("{{ getvar_or_default 'ARG_2' '456' }}", &vars)
+        .unwrap();
+    assert_eq!(r, "abc");
+
+    let e = renderer
+        .render_template("{{ getvar_or_default 'ARG_3' '456' }}", &vars)
+        .unwrap_err()
+        .to_string();
+    assert!(e.contains("var `ARG_3` is undefined"));
+}

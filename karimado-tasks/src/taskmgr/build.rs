@@ -2,8 +2,7 @@
 #[path = "build_test.rs"]
 mod tests;
 
-use handlebars::Handlebars;
-use serde_json::json;
+use serde_json::{json, Map as JsonMap, Value as JsonValue};
 use std::path::{Path, PathBuf};
 
 use crate::{error::*, taskfile, Task};
@@ -137,14 +136,25 @@ fn build_taskfile_task(task: &taskfile::Task, ctx: &mut BuildingContext) -> Resu
 }
 
 fn build_taskfile_task_command(task: &taskfile::Task, ctx: &mut BuildingContext) -> Result<String> {
-    let renderer = Handlebars::new();
-    let vars = &json!({
-        "CLI_ARGS": ctx.cli_args
-    });
+    let vars = build_taskfile_task_command_vars(task, ctx);
+    let h1 = Box::new(hbs_helper_getvar_or_default(vars.clone()));
+
+    let mut renderer = handlebars::Handlebars::new();
+    renderer.register_helper("getvar_or_default", h1);
+
     let command = renderer
         .render_template(&task.command, &vars)
         .map_err(TaskFileParseErrorKind::ParseTaskCommandError)?;
     Ok(command)
+}
+
+fn build_taskfile_task_command_vars(
+    _task: &taskfile::Task,
+    ctx: &mut BuildingContext,
+) -> JsonMap<String, JsonValue> {
+    let mut map = JsonMap::new();
+    map.insert("CLI_ARGS".to_string(), json!(ctx.cli_args));
+    map
 }
 
 fn build_taskfile_task_current_dir(
@@ -157,4 +167,55 @@ fn build_taskfile_task_current_dir(
         ctx.tasks_cwd.clone()
     };
     Ok(cwd)
+}
+
+fn hbs_helper_getvar_or_default(
+    vars: JsonMap<String, JsonValue>,
+) -> impl for<'a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i> Fn(
+    &'a handlebars::Helper<'b>,
+    &'c handlebars::Handlebars<'d>,
+    &'e handlebars::Context,
+    &'f mut handlebars::RenderContext<'g, 'h>,
+    &'i mut (dyn handlebars::Output + 'i),
+) -> std::result::Result<(), handlebars::RenderError> {
+    move |h: &handlebars::Helper,
+          _: &handlebars::Handlebars,
+          _c: &handlebars::Context,
+          _rc: &mut handlebars::RenderContext,
+          out: &mut dyn handlebars::Output|
+          -> handlebars::HelperResult {
+        let name = h.param(0).and_then(|v| v.value().as_str()).ok_or(
+            handlebars::RenderErrorReason::ParamTypeMismatchForName(
+                "`getvar_or_default`",
+                "`var_name`".to_string(),
+                "String".to_string(),
+            ),
+        )?;
+        let default = h.param(1).and_then(|v| v.value().as_str()).ok_or(
+            handlebars::RenderErrorReason::ParamTypeMismatchForName(
+                "`getvar_or_default`",
+                "`default`".to_string(),
+                "String".to_string(),
+            ),
+        )?;
+
+        let value = &vars.get(name);
+        if value.is_none() {
+            let e = format!("var `{}` is undefined", name);
+            Err(handlebars::RenderErrorReason::Other(e))?;
+        }
+
+        match value.expect("Option::unwrap()") {
+            JsonValue::String(str) => {
+                if str.is_empty() {
+                    out.write(default)?;
+                } else {
+                    out.write(str)?;
+                }
+            }
+            _ => unreachable!(),
+        };
+
+        Ok(())
+    }
 }

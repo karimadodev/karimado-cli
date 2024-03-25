@@ -1,0 +1,13 @@
+[package]
+name = "karimado-source-template"
+version = "0.0.0"
+description = "Library for rendering projects templates."
+keywords = ["karimado", "scaffolding"]
+homepage = "https://github.com/karimadodev/karimado-cli/tree/main/karimado-source-template"
+repository = "https://github.com/karimadodev/karimado-cli/tree/main/karimado-source-template"
+license = "LGPL-3.0-only"
+readme = "README.md"
+edition = "2021"
+
+[dependencies]
+thiserror = "1.0.58"

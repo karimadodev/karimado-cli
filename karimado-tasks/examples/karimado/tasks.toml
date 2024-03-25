@@ -20,5 +20,5 @@ command = "ruby -e 'sleep(2)'"
 
 [[tasks]]
 name = "sleepn"
-command = "ruby -e 'sleep({{CLI_ARGS}})'"
+command = "ruby -e 'sleep({{ getvar_or_default 'CLI_ARGS' '0' }})'"
 description = "ruby -e 'sleep(n)'"

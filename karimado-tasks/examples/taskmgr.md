@@ -8,6 +8,8 @@ Run a defined task
 
 ```console
 $ taskmgr --help
+Library for running a command defined in the taskfile.
+
 Usage: taskmgr[EXE] [OPTIONS] [TASK]... [-- <ARGS>...]
 
 Arguments:

@@ -1,9 +1,12 @@
 [package]
 name = "karimado-source-dl"
 version = "0.0.0"
+description = "Library for downloading source code."
+keywords = ["karimado", "download"]
 homepage = "https://github.com/karimadodev/karimado-cli"
 repository = "https://github.com/karimadodev/karimado-cli"
 license = "LGPL-3.0-only"
+readme = "README.md"
 edition = "2021"
 
 [dependencies]
